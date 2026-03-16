@@ -52,7 +52,7 @@ Module routing:
 
 MCU communication:
 
-* The two MCUs will communicate with each other via I2C. One MCU will handle the audio input and signal processing while the other will handle the user interface and control. If there is an audio input, the MCU 1 will sample incoming audio using an ADC. Signal processing will map the different modules based on the intensity parameters given by MCU 2. MCU 1 will send output audio to the speaker. MCU 2 will read the knobs and use the ADC to measure potentiometer values which will relate to module intensity. It will also read the button inputs and account for debouncing. It will send this info via I2C to MCU 1 to generate the audio output.
+* The two MCUs will communicate with each other via I2C. MCU 1 will read the knobs (potentiometers) using ADC, detect button presses using interrupts, determine which module is active or bypassed, and send control values to the second MCU 2. MCU 2 will denerate control voltages for modules, control analog switches that enable/bypass modules, adjust effect intensity based on knob values, monitor audio levels using ADC if needed, and control any timing-related effects (like echo).
 
 Output audio:
 
@@ -60,12 +60,12 @@ Output audio:
 
 **5.2 Functionality**
 
-| ID     | Description                                                                                                                                                                                                              |
-| ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| SRS-01 | The IMU 3-axis acceleration will be measured with 16-bit depth every 100 milliseconds +/-10 milliseconds                                                                                                                 |
-| SRS-02 | The distance sensor shall operate and report values at least every .5 seconds.                                                                                                                                           |
-| SRS-03 | Upon non-nominal distance detected (i.e., the trap mechanism has changed at least 10 cm from the nominal range), the system shall be able to detect the change and alert the user in a timely manner (within 5 seconds). |
-| SRS-04 | Upon a request from the user, the system shall get an image from the internal camera and upload the image to the user system within 10s.                                                                                 |
+| ID     | Description                       |
+| ------ | ---------------------------------------------------------------------------------------------------------------------- |
+| SRS-01 | The buttons that control the input voltage and inputing live audio will use interrupts and require software debouncing. |
+| SRS-02 | The two MCUs must communicate using I2C where MCU1 sends updates to MCU2 when values change and MCU2 receives data using an interrupt. |
+| SRS-03 | The microphone should intake audio when a button is pressed and the input signal should be monitored using an ADC.|
+| SRS-04 | The ouput audio will also be monitred using the ADC to detect distortion or clipping. |
 
 ### 6. Hardware Requirements Specification (HRS)
 
@@ -98,10 +98,11 @@ Audio output:
 
 | ID     | Description                                                                                                                        |
 | ------ | ---------------------------------------------------------------------------------------------------------------------------------- |
-| HRS-01 | A distance sensor shall be used for obstacle detection. The sensor shall detect obstacles at a maximum distance of at least 10 cm. |
-| HRS-02 | A noisemaker shall be inside the trap with a strength of at least 55 dB.                                                           |
-| HRS-03 | An electronic motor shall be used to reset the trap remotely and have a torque of 40 Nm in order to reset the trap mechanism.      |
-| HRS-04 | A camera sensor shall be used to capture images of the trap interior. The resolution shall be at least 480p.                       |
+| HRS-01 | A microphone will intake live audio and play through the modules. |
+| HRS-02 | The modules will be hardware based and made up of passive components. |
+| HRS-03 | Some manual routing will probably be required, so connecting certain modules through hardware will be needed.      |
+| HRS-04 | The buttons and knobs will turn a module or adjust the input voltage which changed the intensity of the module. |
+| HRS-05 | The audio will output threough a speaker which will require an audio buffer/amplifer and audio amplifer to drive the signal through a speaker. |
 
 ### 7. Bill of Materials (BOM)
 
