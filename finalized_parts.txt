@@ -1,0 +1,31 @@
+USING: 
+For Microphone: Electret Microphone Amplifier - MAX9814
+For Pre-Amp: (the same) Electret Microphone Amplifier - MAX9814
+For Output Amp: Stereo 2.1W Class D Audio Amplifier - TPA2012
+For Speaker: at home speaker or AST-03208MR-R
+
+Electret Microphone Amplifier - MAX9814
+- http://AfmBOorloo779mgIO4CJQvcvtxGO6InRc07cuzwLM6ZgvbfrqGNLS_gw
+- Comes with a microphone, up to 20kHz (limit of human hearing range)
+- the default 'max gain' is 60dB, but can be set to 40dB or 50dB by jumpering the Gain pin to VCC or ground
+- Pins: AR, out, Gain, Vdd, GND
+- Output is 2Vpp max with a 1.25V DC offset
+- Works well w/ ADC input of 3.3V (good for STM32)
+
+I2S MEMS Microphone Breakout - SPH0645LM4H
+- https://www.adafruit.com/product/3421?srsltid=AfmBOoqp2WRJInd3YiHxNqGG1jnJGZDeQnyUoE2Xf0Osnp9s8FyEq0c0
+- I2S → high speed, meant for sound
+- No analog conversion required! Instead of an analog output, there are three digital pins: Clock, Data, and Left-Right (Word Select) Clock. When connected to your microcontroller/computer, the 'I2S Controller' will drive the clock and word-select pins at a high frequency and read out the data from the microphone. 
+
+Stereo 3.7W Class D Audio Amplifier - MAX98306
+- https://www.adafruit.com/product/987?srsltid=AfmBOop89IfcjAR4AJ-ZmU1Wlkn1-mVy1G-qaptpDALN0yNDP3a9qpu9
+- able to deliver 1.7W at 8Ω (detkin speakers are 8Ohms, 100mW)
+- Five pin-selectable gains: 6dB, 9dB, 12dB, 15dB and 18dB.
+- Low current draw ~2mA
+- Datasheet: https://cdn-shop.adafruit.com/datasheets/MAX98306.pdf
+- Needs 5V Vdd
+
+Stereo 2.1W Class D Audio Amplifier - TPA2012
+- https://www.adafruit.com/product/1552?gad_source=1&gad_campaignid=23433152610&gbraid=0AAAAADx9JvS2wKB9M6C6-Didp2PLA1CwL&gclid=Cj0KCQjwyr3OBhD0ARIsALlo-OkATRVP4NCapFT6l8KC-BgVejumEs0mWHLX0xkRj0B4p7EZXR_Fv9caAp9oEALw_wcB
+- 1.4W at 8Ω
+- Low current draw: typ 6mA quiescent and 1.5uA in shutdown mode

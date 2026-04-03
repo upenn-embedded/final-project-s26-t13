@@ -29,11 +29,11 @@ Our motivation for this project is a general interest in synthesizers and modula
 
 ### 3. System Block Diagram
 
-![block diagram](blockdiagram.png)
+![block diagram](images/blockdiagram.png)
 
 ### 4. Design Sketches
 
-![drawing](drawing.png)
+![drawing](images/drawing.png)
 
 ### 5. Software Requirements Specification (SRS)
 
@@ -129,22 +129,51 @@ For our final demo of the project, we plan on showing the different modules that
 
 So far, we have met with Andrea, our project manager, and figured out our situation in terms of parts. We found that despite needing a microphone and preamplifier, Detkin actually had the parts that we needed so we do not need to order anything a la carte for this project. We also decided to shift our microcontrollers to the STM32s instead of the ATMega328-PB, since the STM32 is much better suited for ADC applications and our project is largely using ADC. We also decided to shift our communication protocol between our microcontrollers from I2C to I2S, as per Andrea's guidance, since I2S is much better suited for high-quality audio.
 
-### Current state of project
-
 As of the beginning of our first lab period designated for the final project, we do not have any code or hardware written. Our plan is to create our CircuitLab schematic for all of the connections between our physical hardware and module creation. We will also confirm all of our parts. We plan to start on at least some portions of the hardware connections (input, output, 1 module (VCO)), and get a decent start on our firmware. At the very least, figure out a structure for our code, learn the STM registers better so we can code more efficiently, and get some files started with pseudocode for what they need to do. At the end of the lab section, we will include our schematic and indicate which portions we started for hardware.
 
-GOALS:
+TLDR; GOALS:
 
 * Circuitlab schematic
 * Confirm all parts
 * Hardware: Input, Output, VCO Module
 * Firmware: Learn registers, file structure w/ pseudocode
 
-As of the end of the lab period:
+### Current state of project
 
+As of the end of the lab period, we've started looking into the registers of the STM, we built the VCO module and the speaker, confirmed all of our parts, and got started on a circuit schematic. We decided that since the modules are relatively simple and there are existing schematics for oscillators, amplifiers, and envelope generators, for now we will black box the modules on our schematic and focus more on the connections between the circuits and the STMs, which is more complex. As we finalize our designs after iteration, we will develop a full, accurate circuit schematic that we can reference as we make changes to connections and code, as well as the final form factor.
 
+We demonstrated to Andrea that our oscillator works and is able to take a DC control voltage from the Keysight power supply and turn it into an AC triangle signal or square wave. We also showed her the beginnings of our circuit schematic, as well as our document verbally walking through descriptions of the schematic, which is in this repository at **schematic_description.txt**.  We also finalized all parts, sourced them from Detkin's storage, and began looking into how to connect them. Part list is here: finalized_parts.txt.
+
+Photo of oscillator:
+![vco photo](images/sprint1circuit.png)
+
+Speaker driver pinout:
+![speakerdriver](images/speakerdriver.png)
 
 ### Next week's plan
+
+By the beginning of next week, we plan to have a finished schematic done and know exactly what pins to connect our microcontrollers to inputs and outputs of our modules and other hardware. We plan to have the beginnings of our code, as well as have a working input module for the microphone.
+
+By the end of next week, we want a decent amount of code done, as well as a near-done MVP that takes in input from a control voltage. is able to oscillate the control voltage and adapt the pitch and shape using potentiometers, and output the adapted signal.
+
+Though we plan to have the microphone module and logic done by next week, we plan to focus more on the microphone pipeline after sprint review #2 and ensure it's done by the MVP demo. This will require having the speech input module done, which will discretize the speech input and output it, to be put into the amplifier or other modules.
+
+**Schematic and Design**: Bhavya
+
+- will be done by beginning of next lab session
+- 3-4 hours (especially for STM pin planning)
+
+**Code Start**: Primarily Mary, but everyone focusing on different sections of the code.
+
+- 3-4 hours
+
+**Amplifier:** Katya
+
+- 2-3 hours
+
+**Other Modules**: Sarah
+
+- 2-3 hours
 
 ## Sprint Review #2
 
