@@ -131,7 +131,14 @@ So far, we have met with Andrea, our project manager, and figured out our situat
 
 ### Current state of project
 
-As of the beginning of our first lab period designated for the final project, we do not have any code or hardware written. Our plan is to create our CircuitLab schematic for all of the connections between our physical hardware and module creation. We plan to start on at least some portions of the hardware connections, and get a decent start on our firmware. At the very least, figure out a structure for our code, learn the STM registers better so we can code more efficiently, and get some files started with pseudocode for what they need to do. At the end of the lab section, we will include our schematic and indicate which portions we started for hardware.
+As of the beginning of our first lab period designated for the final project, we do not have any code or hardware written. Our plan is to create our CircuitLab schematic for all of the connections between our physical hardware and module creation. We will also confirm all of our parts. We plan to start on at least some portions of the hardware connections (input, output, 1 module (VCO)), and get a decent start on our firmware. At the very least, figure out a structure for our code, learn the STM registers better so we can code more efficiently, and get some files started with pseudocode for what they need to do. At the end of the lab section, we will include our schematic and indicate which portions we started for hardware.
+
+GOALS:
+
+* Circuitlab schematic
+* Confirm all parts
+* Hardware: Input, Output, VCO Module
+* Firmware: Learn registers, file structure w/ pseudocode
 
 As of the end of the lab period:
 
