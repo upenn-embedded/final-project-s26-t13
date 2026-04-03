@@ -60,12 +60,12 @@ Output audio:
 
 **5.2 Functionality**
 
-| ID     | Description                       |
-| ------ | ---------------------------------------------------------------------------------------------------------------------- |
-| SRS-01 | The buttons that control the input voltage and inputing live audio will use interrupts and require software debouncing. |
+| ID     | Description                                                                                                                            |
+| ------ | -------------------------------------------------------------------------------------------------------------------------------------- |
+| SRS-01 | The buttons that control the input voltage and inputing live audio will use interrupts and require software debouncing.                |
 | SRS-02 | The two MCUs must communicate using I2C where MCU1 sends updates to MCU2 when values change and MCU2 receives data using an interrupt. |
-| SRS-03 | The microphone should intake audio when a button is pressed and the input signal should be monitored using an ADC.|
-| SRS-04 | The ouput audio will also be monitred using the ADC to detect distortion or clipping. |
+| SRS-03 | The microphone should intake audio when a button is pressed and the input signal should be monitored using an ADC.                     |
+| SRS-04 | The ouput audio will also be monitred using the ADC to detect distortion or clipping.                                                  |
 
 ### 6. Hardware Requirements Specification (HRS)
 
@@ -96,12 +96,12 @@ Audio output:
 
 **6.2 Functionality**
 
-| ID     | Description                                                                                                                        |
-| ------ | ---------------------------------------------------------------------------------------------------------------------------------- |
-| HRS-01 | A microphone will intake live audio and play through the modules. |
-| HRS-02 | The modules will be hardware based and made up of passive components. |
-| HRS-03 | Some manual routing will probably be required, so connecting certain modules through hardware will be needed.      |
-| HRS-04 | The buttons and knobs will turn a module or adjust the input voltage which changed the intensity of the module. |
+| ID     | Description                                                                                                                                    |
+| ------ | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| HRS-01 | A microphone will intake live audio and play through the modules.                                                                              |
+| HRS-02 | The modules will be hardware based and made up of passive components.                                                                          |
+| HRS-03 | Some manual routing will probably be required, so connecting certain modules through hardware will be needed.                                  |
+| HRS-04 | The buttons and knobs will turn a module or adjust the input voltage which changed the intensity of the module.                                |
 | HRS-05 | The audio will output threough a speaker which will require an audio buffer/amplifer and audio amplifer to drive the signal through a speaker. |
 
 ### 7. Bill of Materials (BOM)
@@ -127,7 +127,15 @@ For our final demo of the project, we plan on showing the different modules that
 
 ### Last week's progress
 
+So far, we have met with Andrea, our project manager, and figured out our situation in terms of parts. We found that despite needing a microphone and preamplifier, Detkin actually had the parts that we needed so we do not need to order anything a la carte for this project. We also decided to shift our microcontrollers to the STM32s instead of the ATMega328-PB, since the STM32 is much better suited for ADC applications and our project is largely using ADC. We also decided to shift our communication protocol between our microcontrollers from I2C to I2S, as per Andrea's guidance, since I2S is much better suited for high-quality audio.
+
 ### Current state of project
+
+As of the beginning of our first lab period designated for the final project, we do not have any code or hardware written. Our plan is to create our CircuitLab schematic for all of the connections between our physical hardware and module creation. We plan to start on at least some portions of the hardware connections, and get a decent start on our firmware. At the very least, figure out a structure for our code, learn the STM registers better so we can code more efficiently, and get some files started with pseudocode for what they need to do. At the end of the lab section, we will include our schematic and indicate which portions we started for hardware.
+
+As of the end of the lab period:
+
+
 
 ### Next week's plan
 
