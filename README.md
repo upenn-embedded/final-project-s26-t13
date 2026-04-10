@@ -176,12 +176,29 @@ Though we plan to have the microphone module and logic done by next week, we pla
 - 2-3 hours
 
 ## Sprint Review #2
-
 ### Last week's progress
 
+Over the past week, we made progress on our module decisions and beginning to create the hardware. We are finishing up the three physical modules that will be analog: the Voltage Controlled Filter, Oscillator, and Amplifier. Our envelope generator, echo/delay, and speech discretizer will all be in code. We also have a working output speaker module, and sourced a new speaker from one of Katya's old projects to use. We designed the input control module for control voltage, designing the resistive divider to make sure our input voltage was high enough to have enough control over the frequency, while also making sure everything can operate at the 3.3V logic level that the STM32 requires. Bhavya worked on setting up the STM32s, getting buttons going, getting UART going, and all code.
+
+Updated circuit lab schematic in progress (Bhavya):
+![circuit lab](circuitlab.png)
+
+Katya: 
+I brought a speaker and 4 ring audio jack + input from home because the detkin speakers are only capable of supporting >600Hz sound signals (which would not allow us to produce mid-low notes). I set up the new speaker and we decided to discard our amplifier since the speaker has an internal one. Then, using the waveform generator I found a range of input signal we want for loudness: 0mVpp to 400mVpp. I went on to characterize the output of the Voltage controlled oscillator we made and found that the outputs ranged from 1Vpp to 3.5Vpp (triangle wave roughly half the amplitude of the square wave). So, my next step is to design an amplifier to step down the signal and to do an impedance transform as the speaker has a very low impedance.
+![speaker](images/speaker.png)
+![speaker](images/speakerdriver.png)
+![speaker](images/speakerschem.png)
+
+Filter schematic & photo (Sarah worked on this):
+![filter schematic](images/filter_schematic.png)
+
+![filter photo](images/filter.png)
+
 ### Current state of project
+We have a lot of the hardware done. The main focus now is software. We have a plan to have a master output pin PA4 on the audio STM so we can reroute the module order within the firmware and not have to deal with moving physical pins. We are planning to run each module as a subroutine and have different scenarios based on the preset button that is pushed to select a module order. We are also working on getting a serial monitor going on one of our computers that will indicate what presets we are on. We will do this with uart that works with all of the buttons. We may also use uart to indicate the control voltage level.
 
 ### Next week's plan
+Getting the MVP demo done! We want all hardware and all software done to get a working modular synthesizer, though it will be rough and on breadboards. The focus of our last week before the final demo will be converting everything to a laser-cut box that will contain all of our hardware and will be much more user-friendly. We have plans to work on this throughout the week together to make sure everything is ready by next Friday.
 
 ## MVP Demo
 

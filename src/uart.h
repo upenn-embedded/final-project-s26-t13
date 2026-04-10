@@ -13,7 +13,6 @@ void uart_printf(USART_TypeDef * base, const char *fmt, ...);
 
 void usart1_printf(const char *fmt, ...);
 
-
 /*
  * Convenience function to setup USART1 on PA9 and PA10 with 115200 baud
  */
