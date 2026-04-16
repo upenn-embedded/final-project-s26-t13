@@ -1,31 +1,17 @@
-#include "discretizer.h"
-#include <math.h>
+#ifndef DISCRETIZER_H
+#define DISCRETIZER_H
+
+#include "main.h"
 
 typedef struct {
-	uint8_t  resolution;       // Bit-depth (e.g., 8-bit or 12-bit sound)
-	uint16_t downsample_rate;  // How many samples to skip (Sample-and-Hold)
-	uint16_t sample_counter;   // Internal: Tracks when to grab the next sample
-	float    last_sample;      // Internal: The "held" value between updates
+    uint8_t  resolution;
+    uint16_t downsample_rate;
+    uint16_t sample_counter;
+    float    last_sample;
 } Discretizer_t;
 
-void Discretizer_Init(Discretizer_t* disc, uint8_t bits, uint16_t downsample) {
-    disc->resolution = bits;
-    disc->downsample_rate = downsample;
-    disc->sample_counter = 0;
-    disc->last_sample = 0.0f;
-}
+// Just the "blueprints" here:
+void  Discretizer_Init(Discretizer_t* disc, uint8_t bits, uint16_t downsample);
+float Discretizer_Process(Discretizer_t* disc, float input);
 
-float Discretizer_Process(Discretizer_t* disc, float input) {
-    disc->sample_counter++;
-
-    // Only update the value every 'downsample_rate' samples
-    if (disc->sample_counter >= disc->downsample_rate) {
-        disc->sample_counter = 0;
-
-        // Quantization (Bit reduction)
-        float levels = powf(2.0f, (float)disc->resolution);
-        disc->last_sample = roundf(input * levels) / levels;
-    }
-
-    return disc->last_sample;
-}
+#endif

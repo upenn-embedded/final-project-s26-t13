@@ -10,9 +10,6 @@
 
 /* --- Global Pipeline State --- */
 /* This allows the Main Loop to change presets while the Interrupt processes audio */
-extern AudioPipeline_t myPipeline;
-
-/* --- Function Prototypes --- */
 
 /**
  * @brief Initializes the audio peripherals and the DSP pipeline.

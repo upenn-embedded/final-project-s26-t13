@@ -1,3 +1,4 @@
+#include "main.h"
 #include "echo.h"
 
 void Echo_Init(Echo_t* echo, uint32_t delay_ms) {

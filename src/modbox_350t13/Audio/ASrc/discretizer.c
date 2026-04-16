@@ -3,7 +3,8 @@
 
 void Discretizer_Init(Discretizer_t* disc, uint8_t bits, uint16_t downsample) {
     disc->resolution = bits;
-    disc->downsample_rate = downsample;
+    // Prevent division by zero or super-fast sampling
+    disc->downsample_rate = (downsample < 1) ? 1 : downsample;
     disc->sample_counter = 0;
     disc->last_sample = 0.0f;
 }
@@ -11,12 +12,14 @@ void Discretizer_Init(Discretizer_t* disc, uint8_t bits, uint16_t downsample) {
 float Discretizer_Process(Discretizer_t* disc, float input) {
     disc->sample_counter++;
 
-    // Only update the value every 'downsample_rate' samples
     if (disc->sample_counter >= disc->downsample_rate) {
         disc->sample_counter = 0;
 
-        // Quantization (Bit reduction)
-        float levels = powf(2.0f, (float)disc->resolution);
+        // Efficient Quantization:
+        // We calculate how many "steps" the bit depth allows
+        float levels = (float)(1 << disc->resolution);
+
+        // Crush the input (assumes input is -1.0 to 1.0)
         disc->last_sample = roundf(input * levels) / levels;
     }
 

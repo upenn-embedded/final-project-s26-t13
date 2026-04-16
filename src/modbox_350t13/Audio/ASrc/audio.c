@@ -2,6 +2,10 @@
 #include <stdio.h>
 #include <string.h>
 #include "audio_pipeline.h"
+#include "audio.h"
+#include "adc.h"   // <--- Crucial
+#include "dac.h"   // <--- Crucial
+#include "tim.h"   // <--- Crucial
 
 AudioPipeline_t myPipeline;
 volatile bool audio_ready = false;
