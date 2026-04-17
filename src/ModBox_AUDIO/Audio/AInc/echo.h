@@ -10,6 +10,7 @@ typedef struct {
     uint32_t write_pos;
     float feedback;  // 0.0 to 0.9 (don't go to 1.0 or it will loop forever/clip)
     float mix;       // 0.0 (dry) to 1.0 (wet)
+    float time;
     uint32_t delay_samples;
 } Echo_t;
 

@@ -28,7 +28,7 @@ typedef struct {
 } AudioPipeline_t;
 
 void    Pipeline_Init(AudioPipeline_t *p);
-int16_t Pipeline_Process(AudioPipeline_t *p, int16_t input_sample, bool hardware_gate);
+float Pipeline_Process(AudioPipeline_t *p, float input_sample, bool hardware_gate);
 void    Pipeline_SetSource(AudioPipeline_t *p, InputSource_t source);
 void    Pipeline_SetPreset(AudioPipeline_t *p, uint8_t preset_id);
 

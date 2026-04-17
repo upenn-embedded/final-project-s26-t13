@@ -57,18 +57,6 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
-#define input_type_Pin GPIO_PIN_13
-#define input_type_GPIO_Port GPIOC
-#define attack_Pin GPIO_PIN_0
-#define attack_GPIO_Port GPIOA
-#define release_Pin GPIO_PIN_1
-#define release_GPIO_Port GPIOA
-#define time_Pin GPIO_PIN_5
-#define time_GPIO_Port GPIOA
-#define feedback_Pin GPIO_PIN_6
-#define feedback_GPIO_Port GPIOA
-#define resolution_Pin GPIO_PIN_7
-#define resolution_GPIO_Port GPIOA
 #define preset_1_Pin GPIO_PIN_9
 #define preset_1_GPIO_Port GPIOA
 #define preset_2_Pin GPIO_PIN_10

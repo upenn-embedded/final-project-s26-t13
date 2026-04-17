@@ -21,25 +21,29 @@
 #include "adc.h"
 #include "dma.h"
 #include "i2c.h"
+#include "tim.h"
 #include "usart.h"
 #include "gpio.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include <string.h>
+#include <stdio.h>
+#include <stdbool.h>
+#include "audio_pipeline.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
-void SystemClock_Config(void);
-
 typedef struct {
     uint8_t input_mode;
     uint8_t preset_id;
-    uint8_t dirty_flag;
-} SynthState_t;
-
-SynthState_t synth_state = {0, 0, 0};
+    uint8_t attack;
+    uint8_t release;
+    uint8_t time;
+    uint8_t feedback;
+    uint8_t resolution;
+} SynthParams_t;
 
 void Debug_Log(const char* msg) {
     HAL_UART_Transmit(&huart2, (uint8_t*)msg, strlen(msg), 10);
@@ -60,7 +64,11 @@ void Debug_Log(const char* msg) {
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
+SynthParams_t synth = {0};
+uint8_t rx_buffer[7];
 
+AudioPipeline_t myPipeline;
+volatile bool audio_ready = false; // Flag triggered by Timer 2
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -98,18 +106,22 @@ int main(void)
   SystemClock_Config();
 
   /* USER CODE BEGIN SysInit */
-  Interface_Init();
-//  AudioSystem_Init();
+  //  AudioSystem_Init();
   /* USER CODE END SysInit */
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_DMA_Init();
-  MX_USART2_Init();
+  MX_USART2_UART_Init();
   MX_I2C1_Init();
   MX_ADC1_Init();
+  MX_TIM2_Init();
+  MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
-  HAL_UART_Transmit(&huart2, (uint8_t*)"System Ready. Press Buttons...\r\n", 32, 100);
+  Pipeline_Init(&myPipeline);
+  HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
+  HAL_TIM_Base_Start_IT(&htim2);
+  HAL_UART_Receive_IT(&huart1, rx_buffer, 7);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -119,7 +131,61 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-  }
+	  Audio_Internal_Test();
+	  // -------------------------------------------------------
+	  // 1. NON-BLOCKING PARAMETER SYNC (Runs every 20ms)
+	  // -------------------------------------------------------
+	  static uint32_t last_sync = 0;
+	  if (HAL_GetTick() - last_sync > 20) {
+		  myPipeline.active_preset = synth.preset_id;
+		  myPipeline.source        = (synth.input_mode == 0) ? SOURCE_CV : SOURCE_MIC;
+
+		  // Map Envelope (Higher UART value = Faster Attack/Release)
+		  myPipeline.envelope.attack_rate  = (float)synth.attack / 10000.0f;
+		  myPipeline.envelope.release_rate = (float)synth.release / 10000.0f;
+
+		  // Map Echo (Feedback constrained 0.0 to 0.94 to avoid runaway audio)
+		  myPipeline.echo.feedback      = (float)synth.feedback / 270.0f;
+		  myPipeline.echo.delay_samples = (uint32_t)(synth.time * 15);
+
+		  // Map Bit Crusher
+		  myPipeline.discretizer.resolution = (synth.resolution / 32) + 1; // 1 to 8 bits
+
+		  last_sync = HAL_GetTick();
+	  }
+
+	  // -------------------------------------------------------
+	  // 2. HIGH-SPEED AUDIO ENGINE (Runs at 8kHz)
+	  // -------------------------------------------------------
+	  if (audio_ready) {
+		  audio_ready = false;
+
+		  // A. Read Gate Pin (Change GPIOC and GPIO_PIN_13 if your pin is different)
+		  bool gate_in = (HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_13) == GPIO_PIN_RESET);
+
+		  // B. Get latest ADC sample and normalize it (-1.0 to 1.0)
+		  HAL_ADC_PollForConversion(&hadc1, 1);
+		  uint32_t raw_val = HAL_ADC_GetValue(&hadc1);
+		  float signal_in = ((float)raw_val - 2048.0f) / 2048.0f;
+
+		  // C. Process Signal through your Effects Pipeline
+		  float effect_out = Pipeline_Process(&myPipeline, signal_in, gate_in);
+
+		  // D. Apply VCA (Envelope Volume)
+		  // (Envelope_Update is already called inside Pipeline_Process based on your audio_pipeline code)
+		  float final_out = effect_out; // If Pipeline_Process outputs the fully gated signal
+
+		  // E. PWM Output Translation
+		  // Center the float at 500 (Assuming Timer ARR is 1000)
+		  uint32_t pwm_val = (uint32_t)((final_out + 1.0f) * 500.0f);
+
+		  // Constrain to prevent speaker popping/timer overflow
+		  if (pwm_val > 1049) pwm_val = 1049;
+
+		  // Send to Timer Pin!
+		  __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_1, pwm_val);
+	  }
+	}
   /* USER CODE END 3 */
 }
 
@@ -170,6 +236,53 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
+
+// This function fires automatically exactly 8,000 times a second
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
+    if (htim->Instance == TIM2) {
+        audio_ready = true; // Tell the main loop to process the next sample!
+    }
+
+    /* USER CODE BEGIN 4 */
+
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
+	if (huart->Instance == USART1) { // Change to your specific UART instance
+
+		// 1. Populate the raw synth struct
+		synth.input_mode = rx_buffer[0];
+		synth.preset_id  = rx_buffer[1];
+		synth.attack     = rx_buffer[2];
+		synth.release    = rx_buffer[3];
+		synth.time       = rx_buffer[4];
+		synth.feedback   = rx_buffer[5];
+		synth.resolution = rx_buffer[6];
+
+		// 2. Map the raw integers (0-255) to the DSP Pipeline floats (0.0f - 1.0f)
+		myPipeline.source          = synth.input_mode;
+		myPipeline.active_preset   = synth.preset_id;
+
+		// Scale the 8-bit knob data down to decimals for the audio math
+		// You might need to tweak the division here if attack/release need specific curves
+		myPipeline.envelope.attack_rate  = (float)synth.attack / 255.0f;
+		myPipeline.envelope.release_rate = (float)synth.release / 255.0f;
+		myPipeline.echo.time             = (float)synth.time / 255.0f;
+		myPipeline.echo.feedback         = (float)synth.feedback / 255.0f;
+
+		// (Assuming you add resolution to your pipeline later for the bitcrusher)
+		// myPipeline.bitcrush_res       = synth.resolution;
+
+		// 3. Print debug info
+		char msg[100];
+		// Note: Added \r\n for clean serial monitor formatting
+		sprintf(msg, "Mode: %d | Pre: %d | A:%d R:%d T:%d F:%d\r\n",
+				synth.input_mode, synth.preset_id, synth.attack,
+				synth.release, synth.time, synth.feedback);
+		Debug_Log(msg);
+
+		// 4. Re-arm the interrupt to listen for the next 7-byte packet!
+		HAL_UART_Receive_IT(&huart1, rx_buffer, 7);
+	}
+}
 
 /* USER CODE END 4 */
 

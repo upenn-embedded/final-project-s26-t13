@@ -5,6 +5,7 @@ void Echo_Init(Echo_t* echo, uint32_t delay_ms) {
     for(int i=0; i < ECHO_BUFFER_SIZE; i++) echo->buffer[i] = 0.0f;
     echo->write_pos = 0;
     echo->feedback = 0.5f;
+    echo->time = 0.5f;
     echo->mix = 0.4f;
     // Calculate delay based on 8kHz sample rate
     echo->delay_samples = (delay_ms * 8);
