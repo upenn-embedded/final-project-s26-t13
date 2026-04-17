@@ -57,8 +57,6 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
-#define input_type_Pin GPIO_PIN_9
-#define input_type_GPIO_Port GPIOC
 #define attack_Pin GPIO_PIN_0
 #define attack_GPIO_Port GPIOA
 #define release_Pin GPIO_PIN_1
@@ -69,10 +67,10 @@ void Error_Handler(void);
 #define feedback_GPIO_Port GPIOA
 #define resolution_Pin GPIO_PIN_7
 #define resolution_GPIO_Port GPIOA
+#define input_type_Pin GPIO_PIN_9
+#define input_type_GPIO_Port GPIOC
 #define preset_1_Pin GPIO_PIN_9
 #define preset_1_GPIO_Port GPIOA
-#define preset_2_Pin GPIO_PIN_10
-#define preset_2_GPIO_Port GPIOA
 #define preset_3_Pin GPIO_PIN_11
 #define preset_3_GPIO_Port GPIOA
 #define preset_4_Pin GPIO_PIN_12
@@ -83,6 +81,8 @@ void Error_Handler(void);
 #define TCK_GPIO_Port GPIOA
 #define SWO_Pin GPIO_PIN_3
 #define SWO_GPIO_Port GPIOB
+#define preset_2_Pin GPIO_PIN_5
+#define preset_2_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
 

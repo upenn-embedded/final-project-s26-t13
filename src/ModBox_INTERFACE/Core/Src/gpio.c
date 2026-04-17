@@ -38,6 +38,8 @@
         * Output
         * EVENT_OUT
         * EXTI
+     PB8   ------> I2C1_SCL
+     PB9   ------> I2C1_SDA
 */
 void MX_GPIO_Init(void)
 {
@@ -53,14 +55,28 @@ void MX_GPIO_Init(void)
   /*Configure GPIO pin : input_type_Pin */
   GPIO_InitStruct.Pin = input_type_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct.Pull = GPIO_PULLDOWN;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(input_type_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : preset_1_Pin preset_2_Pin preset_3_Pin preset_4_Pin */
-  GPIO_InitStruct.Pin = preset_1_Pin|preset_2_Pin|preset_3_Pin|preset_4_Pin;
+  /*Configure GPIO pins : preset_1_Pin preset_3_Pin preset_4_Pin */
+  GPIO_InitStruct.Pin = preset_1_Pin|preset_3_Pin|preset_4_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct.Pull = GPIO_PULLDOWN;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : preset_2_Pin */
+  GPIO_InitStruct.Pin = preset_2_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  HAL_GPIO_Init(preset_2_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : PB8 PB9 */
+  GPIO_InitStruct.Pin = GPIO_PIN_8|GPIO_PIN_9;
+  GPIO_InitStruct.Mode = GPIO_MODE_AF_OD;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+  GPIO_InitStruct.Alternate = GPIO_AF4_I2C1;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
 }
 

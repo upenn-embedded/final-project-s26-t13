@@ -7,6 +7,7 @@
 typedef struct {
     uint8_t input_mode;   // 0: CV, 1: MIC
     uint8_t preset_id;    // 0-3
+    uint16_t knobs[5]; // raw ADC values
     uint8_t dirty_flag;   // Set to 1 when a change occurs
 } InterfaceState_t;
 
