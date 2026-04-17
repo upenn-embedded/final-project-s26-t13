@@ -29,11 +29,11 @@ Our motivation for this project is a general interest in synthesizers and modula
 
 ### 3. System Block Diagram
 
-![block diagram](images/blockdiagram.png)
+![block diagram](blockdiagram.png)
 
 ### 4. Design Sketches
 
-![drawing](images/drawing.png)
+![drawing](drawing.png)
 
 ### 5. Software Requirements Specification (SRS)
 
@@ -129,78 +129,60 @@ For our final demo of the project, we plan on showing the different modules that
 
 So far, we have met with Andrea, our project manager, and figured out our situation in terms of parts. We found that despite needing a microphone and preamplifier, Detkin actually had the parts that we needed so we do not need to order anything a la carte for this project. We also decided to shift our microcontrollers to the STM32s instead of the ATMega328-PB, since the STM32 is much better suited for ADC applications and our project is largely using ADC. We also decided to shift our communication protocol between our microcontrollers from I2C to I2S, as per Andrea's guidance, since I2S is much better suited for high-quality audio.
 
+### Current state of project
+
 As of the beginning of our first lab period designated for the final project, we do not have any code or hardware written. Our plan is to create our CircuitLab schematic for all of the connections between our physical hardware and module creation. We will also confirm all of our parts. We plan to start on at least some portions of the hardware connections (input, output, 1 module (VCO)), and get a decent start on our firmware. At the very least, figure out a structure for our code, learn the STM registers better so we can code more efficiently, and get some files started with pseudocode for what they need to do. At the end of the lab section, we will include our schematic and indicate which portions we started for hardware.
 
-TLDR; GOALS:
+GOALS:
 
 * Circuitlab schematic
 * Confirm all parts
 * Hardware: Input, Output, VCO Module
 * Firmware: Learn registers, file structure w/ pseudocode
 
-### Current state of project
+As of the end of the lab period:
 
-As of the end of the lab period, we've started looking into the registers of the STM, we built the VCO module and the speaker, confirmed all of our parts, and got started on a circuit schematic. We decided that since the modules are relatively simple and there are existing schematics for oscillators, amplifiers, and envelope generators, for now we will black box the modules on our schematic and focus more on the connections between the circuits and the STMs, which is more complex. As we finalize our designs after iteration, we will develop a full, accurate circuit schematic that we can reference as we make changes to connections and code, as well as the final form factor.
 
-We demonstrated to Andrea that our oscillator works and is able to take a DC control voltage from the Keysight power supply and turn it into an AC triangle signal or square wave. We also showed her the beginnings of our circuit schematic, as well as our document verbally walking through descriptions of the schematic, which is in this repository at descriptions/**schematic_description.txt**.  We also finalized all parts, sourced them from Detkin's storage, and began looking into how to connect them. Part list is here: descriptions/finalized_parts.txt.
-
-Photo of oscillator:
-![vco photo](images/sprint1circuit.png)
-
-Speaker driver pinout:
-![speakerdriver](images/speakerdriver.png)
 
 ### Next week's plan
-
-By the beginning of next week, we plan to have a finished schematic done and know exactly what pins to connect our microcontrollers to inputs and outputs of our modules and other hardware. We plan to have the beginnings of our code, as well as have a working input module for the microphone.
-
-By the end of next week, we want a decent amount of code done, as well as a near-done MVP that takes in input from a control voltage. is able to oscillate the control voltage and adapt the pitch and shape using potentiometers, and output the adapted signal.
-
-Though we plan to have the microphone module and logic done by next week, we plan to focus more on the microphone pipeline after sprint review #2 and ensure it's done by the MVP demo. This will require having the speech input module done, which will discretize the speech input and output it, to be put into the amplifier or other modules.
-
-**Schematic and Design**: Bhavya
-
-- will be done by beginning of next lab session
-- 3-4 hours (especially for STM pin planning)
-
-**Code Start**: Primarily Mary, but everyone focusing on different sections of the code.
-
-- 3-4 hours
-
-**Amplifier:** Katya
-
-- 2-3 hours
-
-**Other Modules**: Sarah
-
-- 2-3 hours
 
 ## Sprint Review #2
+
 ### Last week's progress
 
-Over the past week, we made progress on our module decisions and beginning to create the hardware. We are finishing up the three physical modules that will be analog: the Voltage Controlled Filter, Oscillator, and Amplifier. Our envelope generator, echo/delay, and speech discretizer will all be in code. We also have a working output speaker module, and sourced a new speaker from one of Katya's old projects to use. We designed the input control module for control voltage, designing the resistive divider to make sure our input voltage was high enough to have enough control over the frequency, while also making sure everything can operate at the 3.3V logic level that the STM32 requires. Bhavya worked on setting up the STM32s, getting buttons going, getting UART going, and all code.
-
-Updated circuit lab schematic in progress (Bhavya):
-![circuit lab](circuitlab.png)
-
-Katya: 
-I brought a speaker and 4 ring audio jack + input from home because the detkin speakers are only capable of supporting >600Hz sound signals (which would not allow us to produce mid-low notes). I set up the new speaker and we decided to discard our amplifier since the speaker has an internal one. Then, using the waveform generator I found a range of input signal we want for loudness: 0mVpp to 400mVpp. I went on to characterize the output of the Voltage controlled oscillator we made and found that the outputs ranged from 1Vpp to 3.5Vpp (triangle wave roughly half the amplitude of the square wave). So, my next step is to design an amplifier to step down the signal and to do an impedance transform as the speaker has a very low impedance.
-![speaker](images/speaker.png)
-![speaker](images/speakerdriver.png)
-![speaker](images/speakerschem.png)
-
-Filter schematic & photo (Sarah worked on this):
-![filter schematic](images/filter_schematic.png)
-
-![filter photo](images/filter.png)
-
 ### Current state of project
-We have a lot of the hardware done. The main focus now is software. We have a plan to have a master output pin PA4 on the audio STM so we can reroute the module order within the firmware and not have to deal with moving physical pins. We are planning to run each module as a subroutine and have different scenarios based on the preset button that is pushed to select a module order. We are also working on getting a serial monitor going on one of our computers that will indicate what presets we are on. We will do this with uart that works with all of the buttons. We may also use uart to indicate the control voltage level.
 
 ### Next week's plan
-Getting the MVP demo done! We want all hardware and all software done to get a working modular synthesizer, though it will be rough and on breadboards. The focus of our last week before the final demo will be converting everything to a laser-cut box that will contain all of our hardware and will be much more user-friendly. We have plans to work on this throughout the week together to make sure everything is ready by next Friday.
 
 ## MVP Demo
+
+1. Hardware Implementation & System Diagram 
+Our hardware implementation centers around a modular rack where audio signals are processed through several custom modules: VCO, VCF, VCA, Echo, Discretizer, and an Envelope Generator.
+We’ve made one significant update to our original design: we are now using STM32s as our MCU Core instead of the ATmega328P to better handle the processing requirements. Currently, our Power and Physical UI systems are fully operational. While the Audio Input is still in development, we’ve established that the microphone signal will require dedicated hardware amplification and filtering to ensure high signal quality for the synthesizer.
+
+![alt text](blockdiagram.png) 
+
+2. Firmware Implementation & Drivers
+For the firmware, we are developing application logic on the STM32 to handle the high-speed conversion and routing of signals. We’ve written critical drivers for the ADC to read our physical UI knobs and the GPIO for our five module toggle buttons. The core logic currently manages the switching between hardware modules and the basic operation of the VCO and VCA, which are already functional. Implementation of Envelope Follower, Echo and Discretizer is done completely digitally.
+
+3. Device Demonstration
+In this demo, you can see the core functionality of our VCO and VCA. We can manipulate the tone using the physical potentiometers on our UI. Even though the microphone input isn't finalized, the internal signal routing through the Module Rack is working, allowing us to demonstrate the basic analog audio path through to the speaker. 
+
+4. Software Requirements Specification (SRS)
+We have achieved our SRS goals regarding real-time user input. Data collected from our potentiometer ADC tests shows stable parameter control with minimal latency, ensuring that the 'ModBox' feels like a responsive instrument. Our next software milestone is finishing the microphone input.
+
+5. Hardware Requirements Specification (HRS)
+On the hardware side, we’ve met most of our requirements for the Output Amplifier and Power Regulation. We verified the output buffer’s ability to stabilize the signal for the speaker. We are using a boost converter in our final output stage, the VCA.
+
+6. Remaining Elements (Mechanical & UI)
+Our final vision includes a custom mechanical casework that mimics a classic modular synth aesthetic. We will feature 'patch cable' wiring for visual effect and a structured interface for the module toggle buttons and adjuster knobs. Something similar to what we have below, though the UI will probably look a bit different.
+
+![alt text](mechanicaldesign.png)
+
+7. Risks & De-risking Plan
+Each time we add something we deal with amplification and noise issues. Adding one more element can break the rest of the circuits and code.
+One of the riskiest parts remaining is the Microphone Input. Because the raw electret signal is so weak and noisy, it could easily ruin the modular processing. To de-risk this, we are prioritizing the hardware filter/amplifier circuit this week to ensure we have a clean signal before Demo Day next week.
+
 
 ## Final Report
 
