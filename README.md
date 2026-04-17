@@ -183,6 +183,13 @@ Our final vision includes a custom mechanical casework that mimics a classic mod
 Each time we add something we deal with amplification and noise issues. Adding one more element can break the rest of the circuits and code.
 One of the riskiest parts remaining is the Microphone Input. Because the raw electret signal is so weak and noisy, it could easily ruin the modular processing. To de-risk this, we are prioritizing the hardware filter/amplifier circuit this week to ensure we have a clean signal before Demo Day next week.
 
+Topics
+Power managements(DONE)
+Noise filtering(DONE)
+Timers(DONE)
+ADC(DONE)
+UART(DONE)
+
 
 ## Final Report
 
