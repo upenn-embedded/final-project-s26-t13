@@ -52,7 +52,7 @@ void UART_Log(const char* message) {
 //}
 
 /* --- Main Entry Point --- */
-int Audio_Internal_Test(void) {
+void Audio_Internal_Test(void) {
     HAL_Init();
     /* System Clock Config happens here via CubeMX */
 
@@ -84,7 +84,7 @@ int Audio_Internal_Test(void) {
     	// High-speed Audio Processing
 			if (audio_ready) {
 				// 1. Read hardware Gate (PC13 is active-low)
-				bool gate_in = true; //(HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_13) == GPIO_PIN_RESET);
+				bool gate_in = (HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_13) == GPIO_PIN_RESET);
 
 				// 2. Read Sample (from Analog VCO)
 				// (Note: Since we are using UART, we assume source is handled by the pipeline now)

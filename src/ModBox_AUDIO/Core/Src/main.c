@@ -242,6 +242,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
     if (htim->Instance == TIM2) {
         audio_ready = true; // Tell the main loop to process the next sample!
     }
+}
 
     /* USER CODE BEGIN 4 */
 
@@ -274,9 +275,9 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 		// 3. Print debug info
 		char msg[100];
 		// Note: Added \r\n for clean serial monitor formatting
-		sprintf(msg, "Mode: %d | Pre: %d | A:%d R:%d T:%d F:%d\r\n",
+		sprintf(msg, "Mode: %d | Pre: %d | A:%d REL:%d T:%d F:%d RES: %d\r\n",
 				synth.input_mode, synth.preset_id, synth.attack,
-				synth.release, synth.time, synth.feedback);
+				synth.release, synth.time, synth.feedback, synth.resolution);
 		Debug_Log(msg);
 
 		// 4. Re-arm the interrupt to listen for the next 7-byte packet!
