@@ -30,7 +30,6 @@ float Pipeline_Process(AudioPipeline_t *p, float input_sample, bool hardware_gat
     //Envelope_Process(&p->envelope, gate);
     // 1. Check the gate to trigger or release the ADSR
     if (gate == 1 && p->envelope.state == IDLE) {
-    	Envelope_Trigger(&p->envelope);
     } else if (gate == 0 && p->envelope.state != IDLE && p->envelope.state != RELEASE) {
     	Envelope_Release(&p->envelope);
     }

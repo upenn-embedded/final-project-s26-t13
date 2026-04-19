@@ -21,36 +21,67 @@ void UART_Log(const char* message) {
 }
 
 /* --- Preset & Source Logic --- */
-//void Handle_Interface_Buttons(void) {
-//    static uint8_t last_preset = 255;
-//    static InputSource_t last_source = 255;
-//    char debug_buffer[50];
-//
-//    // 1. Check Master Source Toggle (A4)
-//    InputSource_t current_source = (HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_4) == GPIO_PIN_SET) ? SOURCE_MIC : SOURCE_CV;
-//
-//    if (current_source != last_source) {
-//        myPipeline.source = current_source;
-//        last_source = current_source;
-//        UART_Log(current_source == SOURCE_MIC ? "[STATUS] Source: MICROPHONE" : "[STATUS] Source: VCO (CV)");
-//    }
-//
-//    // 2. Check Preset Selectors (A0 - A3)
-//    uint8_t current_preset = myPipeline.active_preset;
-//    if      (HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0) == GPIO_PIN_SET) current_preset = 0;
-//    else if (HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_1) == GPIO_PIN_SET) current_preset = 1;
-//    else if (HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_2) == GPIO_PIN_SET) current_preset = 2;
-//    else if (HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_3) == GPIO_PIN_SET) current_preset = 3;
-//
-//    if (current_preset != last_preset) {
-//        myPipeline.active_preset = current_preset;
-//        last_preset = current_preset;
-//
-//        sprintf(debug_buffer, "[STATUS] Preset Changed to: %d", current_preset + 1);
-//        UART_Log(debug_buffer);
-//    }
-//}
+void Handle_Interface_Buttons(void) {
+    static uint8_t last_preset = 255;
+    static InputSource_t last_source = 255;
+    char debug_buffer[50];
 
+    // 1. Check Master Source Toggle (A4)
+    InputSource_t current_source = (HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_4) == GPIO_PIN_SET) ? SOURCE_MIC : SOURCE_CV;
+
+    if (current_source != last_source) {
+        myPipeline.source = current_source;
+        last_source = current_source;
+        UART_Log(current_source == SOURCE_MIC ? "[STATUS] Source: MICROPHONE" : "[STATUS] Source: VCO (CV)");
+    }
+
+    // 2. Check Preset Selectors (A0 - A3)
+    uint8_t current_preset = myPipeline.active_preset;
+    if      (HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0) == GPIO_PIN_SET) current_preset = 0;
+    else if (HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_1) == GPIO_PIN_SET) current_preset = 1;
+    else if (HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_2) == GPIO_PIN_SET) current_preset = 2;
+    else if (HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_3) == GPIO_PIN_SET) current_preset = 3;
+
+    if (current_preset != last_preset) {
+        myPipeline.active_preset = current_preset;
+        last_preset = current_preset;
+
+        sprintf(debug_buffer, "[STATUS] Preset Changed to: %d", current_preset + 1);
+        UART_Log(debug_buffer);
+    }
+}
+
+
+/* --- Basic PWM Sine Test (440Hz @ 8kHz Sample Rate) --- */
+void Run_Basic_PWM_Test(void) {
+    // A simple 18-point sine table (normalized 0.0 to 1.0)
+    float sine_table[18] = {
+        0.50, 0.67, 0.82, 0.93, 0.99, 0.99, 0.93, 0.82, 0.67,
+        0.50, 0.33, 0.18, 0.07, 0.01, 0.01, 0.07, 0.18, 0.33
+    };
+    static uint8_t index = 0;
+
+    UART_Log("!!! STARTING BASIC PWM HARDWARE TEST (440Hz Sine) !!!");
+
+    while (1) {
+        if (audio_ready) {
+            // 1. Get next value from table
+            float val = sine_table[index];
+
+            // 2. Convert to PWM (Assuming ARR = 1049)
+            // Range: 0 to 1049
+            uint32_t pwm_duty = (uint32_t)(val * 1049.0f);
+
+            // 3. Update Timer
+            __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_1, pwm_duty);
+
+            // 4. Increment and wrap index
+            index = (index + 1) % 18;
+
+            audio_ready = false;
+        }
+    }
+}
 /* --- Main Entry Point --- */
 void Audio_Internal_Test(void) {
     HAL_Init();
@@ -104,10 +135,3 @@ void Audio_Internal_Test(void) {
 			}
     }
 }
-
-/* --- Timer Interrupt --- */
-//void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
-//    if (htim->Instance == TIM2) {
-//        audio_ready = true;
-//    }
-//}

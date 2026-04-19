@@ -20,7 +20,6 @@
 #include "main.h"
 #include "adc.h"
 #include "dma.h"
-#include "i2c.h"
 #include "tim.h"
 #include "usart.h"
 #include "gpio.h"
@@ -31,6 +30,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include "audio_pipeline.h"
+#include "audio.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -113,7 +113,6 @@ int main(void)
   MX_GPIO_Init();
   MX_DMA_Init();
   MX_USART2_UART_Init();
-  MX_I2C1_Init();
   MX_ADC1_Init();
   MX_TIM2_Init();
   MX_USART1_UART_Init();
@@ -131,59 +130,46 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-	  Audio_Internal_Test();
-	  // -------------------------------------------------------
-	  // 1. NON-BLOCKING PARAMETER SYNC (Runs every 20ms)
-	  // -------------------------------------------------------
-	  static uint32_t last_sync = 0;
-	  if (HAL_GetTick() - last_sync > 20) {
-		  myPipeline.active_preset = synth.preset_id;
-		  myPipeline.source        = (synth.input_mode == 0) ? SOURCE_CV : SOURCE_MIC;
+	  Run_Basic_PWM_Test(); // PWM TEST CODE
+	  // Audio_Internal_Test(); // UNCOMMENT THIS FOR THE ACTUAL CODE
 
-		  // Map Envelope (Higher UART value = Faster Attack/Release)
-		  myPipeline.envelope.attack_rate  = (float)synth.attack / 10000.0f;
-		  myPipeline.envelope.release_rate = (float)synth.release / 10000.0f;
-
-		  // Map Echo (Feedback constrained 0.0 to 0.94 to avoid runaway audio)
-		  myPipeline.echo.feedback      = (float)synth.feedback / 270.0f;
-		  myPipeline.echo.delay_samples = (uint32_t)(synth.time * 15);
-
-		  // Map Bit Crusher
-		  myPipeline.discretizer.resolution = (synth.resolution / 32) + 1; // 1 to 8 bits
-
-		  last_sync = HAL_GetTick();
-	  }
 
 	  // -------------------------------------------------------
 	  // 2. HIGH-SPEED AUDIO ENGINE (Runs at 8kHz)
 	  // -------------------------------------------------------
+	  // -------------------------------------------------------
+	  // 2. HIGH-SPEED AUDIO ENGINE (Runs at 8kHz)
+	  // -------------------------------------------------------
 	  if (audio_ready) {
-		  audio_ready = false;
+	      audio_ready = false;
 
-		  // A. Read Gate Pin (Change GPIOC and GPIO_PIN_13 if your pin is different)
-		  bool gate_in = (HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_13) == GPIO_PIN_RESET);
+	      // A. Start ADC conversion manually
+	      HAL_ADC_Start(&hadc1);
 
-		  // B. Get latest ADC sample and normalize it (-1.0 to 1.0)
-		  HAL_ADC_PollForConversion(&hadc1, 1);
-		  uint32_t raw_val = HAL_ADC_GetValue(&hadc1);
-		  float signal_in = ((float)raw_val - 2048.0f) / 2048.0f;
+	      // B. Wait for conversion (Timeout 1ms is plenty for 8kHz)
+	      // This is "polling," but because it's triggered by the timer,
+	      // it stays in sync.
+	      if (HAL_ADC_PollForConversion(&hadc1, 1) == HAL_OK) {
+	          uint32_t raw_val = HAL_ADC_GetValue(&hadc1);
 
-		  // C. Process Signal through your Effects Pipeline
-		  float effect_out = Pipeline_Process(&myPipeline, signal_in, gate_in);
+	          // C. Normalize it (-1.0 to 1.0)
+	          // 2048 is center for a 12-bit ADC (0-4095)
+	          float signal_in = ((float)raw_val - 2048.0f) / 2048.0f;
 
-		  // D. Apply VCA (Envelope Volume)
-		  // (Envelope_Update is already called inside Pipeline_Process based on your audio_pipeline code)
-		  float final_out = effect_out; // If Pipeline_Process outputs the fully gated signal
+	          // D. Read Gate Pin (PC13 is usually the blue button, active low)
+	          bool gate_in = (HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_13) == GPIO_PIN_RESET);
 
-		  // E. PWM Output Translation
-		  // Center the float at 500 (Assuming Timer ARR is 1000)
-		  uint32_t pwm_val = (uint32_t)((final_out + 1.0f) * 500.0f);
+	          // E. Process Signal through Effects Pipeline
+	          float effect_out = Pipeline_Process(&myPipeline, signal_in, gate_in);
 
-		  // Constrain to prevent speaker popping/timer overflow
-		  if (pwm_val > 1049) pwm_val = 1049;
+	          // F. PWM Output Translation
+	          // If your ARR is 1049, the center is 525.
+	          uint32_t pwm_val = (uint32_t)((effect_out + 1.0f) * 524.5f);
 
-		  // Send to Timer Pin!
-		  __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_1, pwm_val);
+	          // G. Constrain and Write to Timer
+	          if (pwm_val > 1049) pwm_val = 1049;
+	          __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_1, pwm_val);
+	      }
 	  }
 	}
   /* USER CODE END 3 */
@@ -243,8 +229,6 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
         audio_ready = true; // Tell the main loop to process the next sample!
     }
 }
-
-    /* USER CODE BEGIN 4 */
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 	if (huart->Instance == USART1) { // Change to your specific UART instance

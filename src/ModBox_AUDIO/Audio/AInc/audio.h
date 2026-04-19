@@ -33,5 +33,7 @@ void AudioSystem_ProcessTick(void);
  */
 void AudioSystem_HandleInputs(void);
 
+void Run_Basic_PWM_Test(void);
+
 void Audio_Internal_Test(void);
 #endif /* AUDIOMAIN_H */
