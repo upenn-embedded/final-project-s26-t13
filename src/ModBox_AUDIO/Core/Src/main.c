@@ -69,6 +69,9 @@ uint8_t rx_buffer[7];
 
 AudioPipeline_t myPipeline;
 volatile bool audio_ready = false; // Flag triggered by Timer 2
+volatile uint32_t adc_val = 0;
+volatile uint8_t adc_ready_flag = 0;
+char msg[64];
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -132,11 +135,23 @@ int main(void)
     /* USER CODE BEGIN 3 */
 	  Run_Basic_PWM_Test(); // PWM TEST CODE
 	  // Audio_Internal_Test(); // UNCOMMENT THIS FOR THE ACTUAL CODE
+    	  
+//----------------------------TEST THE ADC CODE--------------------------------//
+//	  HAL_ADC_Start_IT(&hadc1);
+//	  if (adc_ready_flag)
+//	      {
+//	          adc_ready_flag = 0; // Reset the flag
+//
+//	          // 3. Format and Send
+//	          // Assuming 12-bit ADC and 3.3V Vref
+//	          float voltage = (adc_val * 3.3f) / 4095.0f;
+//	          int len = sprintf(msg, "Interrupt ADC: %lu | %.2fV\r\n", adc_val, voltage);
+//
+//	          HAL_UART_Transmit(&huart2, (uint8_t*)msg, len, 100);
+//	      }
+//
+//	      HAL_Delay(500); // Heartbeat every 0.5 seconds
 
-
-	  // -------------------------------------------------------
-	  // 2. HIGH-SPEED AUDIO ENGINE (Runs at 8kHz)
-	  // -------------------------------------------------------
 	  // -------------------------------------------------------
 	  // 2. HIGH-SPEED AUDIO ENGINE (Runs at 8kHz)
 	  // -------------------------------------------------------
@@ -144,7 +159,7 @@ int main(void)
 	      audio_ready = false;
 
 	      // A. Start ADC conversion manually
-	      HAL_ADC_Start(&hadc1);
+	      HAL_ADC_Start_IT(&hadc1);
 
 	      // B. Wait for conversion (Timeout 1ms is plenty for 8kHz)
 	      // This is "polling," but because it's triggered by the timer,
