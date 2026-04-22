@@ -20,6 +20,7 @@
 #include "main.h"
 #include "adc.h"
 #include "dma.h"
+#include "i2c.h"
 #include "tim.h"
 #include "usart.h"
 #include "gpio.h"
@@ -30,7 +31,6 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include "audio_pipeline.h"
-#include "audio.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -66,8 +66,10 @@ void Debug_Log(const char* msg) {
 /* USER CODE BEGIN PV */
 SynthParams_t synth = {0};
 uint8_t rx_buffer[7];
-
+volatile uint32_t raw_val = 0;
+volatile float signal_in = 0.0f;
 AudioPipeline_t myPipeline;
+
 volatile bool audio_ready = false; // Flag triggered by Timer 2
 volatile uint32_t adc_val = 0;
 volatile uint8_t adc_ready_flag = 0;
@@ -99,10 +101,9 @@ int main(void)
   /* MCU Configuration--------------------------------------------------------*/
 
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
-  HAL_Init();
 
   /* USER CODE BEGIN Init */
-
+	HAL_Init();
   /* USER CODE END Init */
 
   /* Configure the system clock */
@@ -116,14 +117,19 @@ int main(void)
   MX_GPIO_Init();
   MX_DMA_Init();
   MX_USART2_UART_Init();
+  MX_I2C1_Init();
   MX_ADC1_Init();
   MX_TIM2_Init();
   MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
+  HAL_UART_Transmit(&huart2, (uint8_t*)"STARTING SYSTEM\r\n", 17, 100);
   Pipeline_Init(&myPipeline);
-  HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
   HAL_TIM_Base_Start_IT(&htim2);
+  HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
   HAL_UART_Receive_IT(&huart1, rx_buffer, 7);
+  HAL_ADC_Start(&hadc1);
+
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -133,58 +139,95 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-	  Run_Basic_PWM_Test(); // PWM TEST CODE
-	  // Audio_Internal_Test(); // UNCOMMENT THIS FOR THE ACTUAL CODE
-    	  
-//----------------------------TEST THE ADC CODE--------------------------------//
-//	  HAL_ADC_Start_IT(&hadc1);
-//	  if (adc_ready_flag)
-//	      {
-//	          adc_ready_flag = 0; // Reset the flag
+	  HAL_ADC_Start_IT(&hadc1);
+
+	  // -------------------------------------------------------
+	  // 1. NON-BLOCKING PARAMETER SYNC (Runs every 20ms)
+	  // -------------------------------------------------------
+	  static uint32_t last_sync = 0;
+
+// TESTING THE ENVELOPE PRESET
+
+//	  static uint32_t last_gate_flip = 0;
+//	  static bool virtual_gate = false;
 //
-//	          // 3. Format and Send
-//	          // Assuming 12-bit ADC and 3.3V Vref
-//	          float voltage = (adc_val * 3.3f) / 4095.0f;
-//	          int len = sprintf(msg, "Interrupt ADC: %lu | %.2fV\r\n", adc_val, voltage);
+//	  if (HAL_GetTick() - last_gate_flip > 1000) { // Every 1 second
+//	      virtual_gate = !virtual_gate;
+//	      last_gate_flip = HAL_GetTick();
 //
-//	          HAL_UART_Transmit(&huart2, (uint8_t*)msg, len, 100);
+//	      if (virtual_gate) {
+//	          // "Press Key" -> Moves state to ATTACK
+//	          Envelope_Trigger(&myPipeline.envelope);
+//	      } else {
+//	          // "Release Key" -> Moves state to RELEASE
+//	          Envelope_Release(&myPipeline.envelope);
 //	      }
-//
-//	      HAL_Delay(500); // Heartbeat every 0.5 seconds
+//	  }
+
+	  if (HAL_GetTick() - last_sync > 20) {
+//		  myPipeline.active_preset = synth.preset_id;
+		  myPipeline.source    			= (synth.input_mode == 0) ? SOURCE_CV : SOURCE_MIC;
+
+		  // Map Envelope (Higher UART value = Faster Attack/Release)
+		  myPipeline.envelope.attack_rate  = (float)synth.attack / 10000.0f;
+		  myPipeline.envelope.release_rate = (float)synth.release / 10000.0f;
+
+		  // Map Echo (Feedback constrained 0.0 to 0.94 to avoid runaway audio)
+
+		  myPipeline.echo.feedback      = (float)synth.feedback / 270.0f;
+		  myPipeline.echo.delay_samples = (uint32_t)(synth.time * 15);
+
+		  // Map Bit Crusher
+		  myPipeline.discretizer.resolution = (synth.resolution / 32) + 1; // 1 to 8 bits
+
+		  last_sync = HAL_GetTick();
+	  }
 
 	  // -------------------------------------------------------
 	  // 2. HIGH-SPEED AUDIO ENGINE (Runs at 8kHz)
 	  // -------------------------------------------------------
 	  if (audio_ready) {
-	      audio_ready = false;
+		  audio_ready = false;
 
-	      // A. Start ADC conversion manually
-	      HAL_ADC_Start_IT(&hadc1);
+		  float voltage = (adc_val * 3.3f) / 4095.0f;
 
-	      // B. Wait for conversion (Timeout 1ms is plenty for 8kHz)
-	      // This is "polling," but because it's triggered by the timer,
-	      // it stays in sync.
-	      if (HAL_ADC_PollForConversion(&hadc1, 1) == HAL_OK) {
-	          uint32_t raw_val = HAL_ADC_GetValue(&hadc1);
+		  // A. Read Gate Pin (NEED TO CHANGE THIS PIN)
+		  bool gate_in = (HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_13) == GPIO_PIN_RESET);
 
-	          // C. Normalize it (-1.0 to 1.0)
-	          // 2048 is center for a 12-bit ADC (0-4095)
-	          float signal_in = ((float)raw_val - 2048.0f) / 2048.0f;
+		  // B. Get latest ADC sample and normalize it (-1.0 to 1.0)
+//		  HAL_ADC_PollForConversion(&hadc1, 1);
+		  uint32_t raw_val = HAL_ADC_GetValue(&hadc1);
+		  float signal_in = ((float)raw_val - 745.0f) / 745.0f; // changing because the input was around 0-1.2V
+		  uint32_t current_raw = adc_val;
 
-	          // D. Read Gate Pin (PC13 is usually the blue button, active low)
-	          bool gate_in = (HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_13) == GPIO_PIN_RESET);
 
-	          // E. Process Signal through Effects Pipeline
-	          float effect_out = Pipeline_Process(&myPipeline, signal_in, gate_in);
+		  // 2. SLOW PRINTING (Only every 100ms) print for debugging
+		  //but printing will mess the the pwm so comment out when running
+//		  static uint32_t last_print = 0;
+//		  if (HAL_GetTick() - last_print > 100) {
+//			  char debug_msg[64];
+//			  int len = sprintf(debug_msg, "ADC: %lu | Sig: %.2f\r\n", current_raw, signal_in);
+//			  HAL_UART_Transmit(&huart2, (uint8_t*)debug_msg, len, 10);
+//			  last_print = HAL_GetTick();
+//		        }
 
-	          // F. PWM Output Translation
-	          // If your ARR is 1049, the center is 525.
-	          uint32_t pwm_val = (uint32_t)((effect_out + 1.0f) * 524.5f);
 
-	          // G. Constrain and Write to Timer
-	          if (pwm_val > 1049) pwm_val = 1049;
-	          __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_1, pwm_val);
-	      }
+		  // C. Process Signal through your Effects Pipeline
+		  float effect_out = Pipeline_Process(&myPipeline, signal_in, gate_in);
+
+		  // D. Apply VCA (Envelope Volume)
+		  // (Envelope_Update is already called inside Pipeline_Process based on your audio_pipeline code)
+		  float final_out = effect_out; // If Pipeline_Process outputs the fully gated signal
+
+		  // E. PWM Output Translation
+		  // Center the float at 525 (half of 1050)
+		  uint32_t pwm_val = (uint32_t)((final_out + 1.0f) * 524.5f);
+
+		  // Constrain to prevent speaker popping/timer overflow
+		  if (pwm_val > 1049) pwm_val = 1049;
+
+		  // Send to Timer Pin!
+		  __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_1, pwm_val);
 	  }
 	}
   /* USER CODE END 3 */
@@ -245,6 +288,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
     }
 }
 
+
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 	if (huart->Instance == USART1) { // Change to your specific UART instance
 
@@ -282,6 +326,15 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 		// 4. Re-arm the interrupt to listen for the next 7-byte packet!
 		HAL_UART_Receive_IT(&huart1, rx_buffer, 7);
 	}
+}
+
+void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
+{
+    if(hadc->Instance == ADC1)
+    {
+        adc_val = HAL_ADC_GetValue(hadc);
+        adc_ready_flag = 1; // Signal the main loop that data is ready
+    }
 }
 
 /* USER CODE END 4 */
