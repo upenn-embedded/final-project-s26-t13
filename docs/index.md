@@ -16,9 +16,13 @@ In this demo, we will give an overview of the design process and a demostration 
 
 # Images
 
-![WebsiteImageFilter](./images/WebsiteImageFilter.png)
+<p align="center">
+  <img src="./images/WebsiteImageFilter.png" alt="WebsiteImageFilter" style="max-width: 400px; width: 100%; height: auto;">
+</p>
 
-![SpeakerAmp](./images/WebsiteSpeakerAmp.png)
+<p align="center">
+  <img src="./images/WebsiteSpeakerAmp.png" alt="SpeakerAmp" style="max-width: 400px; width: 100%; height: auto;">
+</p>
 
 ![CAD](./images/CAD.png)
 
