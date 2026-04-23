@@ -28,18 +28,19 @@ void Interface_Init(void) {
 	}
 
 	Debug_Log("--- Interface Online: BUSY Flag Cleared ---");
-    Debug_Log("Controls: (Toggle Mode), PA9-PA12 (Presets), 5 ADC Knobs");
+    Debug_Log("Controls: PA9-PA12 + PC9 (Presets), 5 ADC Knobs");
 }
 
 void Interface_Update(void) {
     static uint32_t last_tick = 0;
 
-    // Memory for button edges
-    static GPIO_PinState last_input_btn_state = GPIO_PIN_RESET;
+    // Memory for button edges (presets 1-5)
     static GPIO_PinState last_p9 = GPIO_PIN_RESET;
     static GPIO_PinState last_p10 = GPIO_PIN_RESET;
     static GPIO_PinState last_p11 = GPIO_PIN_RESET;
     static GPIO_PinState last_p12 = GPIO_PIN_RESET;
+    static GPIO_PinState last_pc9 = GPIO_PIN_RESET;
+
 
     // Memory for knob changes - MUST be static to persist between calls!
     static uint16_t last_knobs[5] = {0};
@@ -66,23 +67,16 @@ void Interface_Update(void) {
     }
 
     /* --- BUTTON LOGIC --- */
-    GPIO_PinState current_btn_state = HAL_GPIO_ReadPin(input_type_GPIO_Port, input_type_Pin);
     GPIO_PinState curr_p9  = HAL_GPIO_ReadPin(GPIOA, preset_1_Pin);
     GPIO_PinState curr_p10 = HAL_GPIO_ReadPin(GPIOB, preset_2_Pin);
     GPIO_PinState curr_p11 = HAL_GPIO_ReadPin(GPIOA, preset_3_Pin);
     GPIO_PinState curr_p12 = HAL_GPIO_ReadPin(GPIOA, preset_4_Pin);
+    GPIO_PinState curr_pc9 = HAL_GPIO_ReadPin(GPIOC, preset_5_Pin);
 
-    // INPUT MODE TOGGLE (PC9)
-    if (current_btn_state == GPIO_PIN_SET && last_input_btn_state == GPIO_PIN_RESET) {
-        iface_state.input_mode = (iface_state.input_mode == 0) ? 1 : 0;
-        iface_state.dirty_flag = 1;
-        Debug_Log(iface_state.input_mode == 0 ? "MODE: Control Voltage" : "MODE: Microphone");
-    }
-    last_input_btn_state = current_btn_state;
 
     // PRESET 1
     if (curr_p9 == GPIO_PIN_SET && last_p9 == GPIO_PIN_RESET) {
-        iface_state.preset_id = 0;
+        iface_state.preset_id = 1;
         iface_state.dirty_flag = 1;
         Debug_Log("BUTTON: Preset 1 Active");
     }
@@ -90,7 +84,7 @@ void Interface_Update(void) {
 
     // PRESET 2
     if (curr_p10 == GPIO_PIN_SET && last_p10 == GPIO_PIN_RESET) {
-        iface_state.preset_id = 1;
+        iface_state.preset_id = 2;
         iface_state.dirty_flag = 1;
         Debug_Log("BUTTON: Preset 2 Active");
     }
@@ -98,7 +92,7 @@ void Interface_Update(void) {
 
     // PRESET 3
     if (curr_p11 == GPIO_PIN_SET && last_p11 == GPIO_PIN_RESET) {
-        iface_state.preset_id = 2;
+        iface_state.preset_id = 3;
         iface_state.dirty_flag = 1;
         Debug_Log("BUTTON: Preset 3 Active");
     }
@@ -106,24 +100,31 @@ void Interface_Update(void) {
 
     // PRESET 4
     if (curr_p12 == GPIO_PIN_SET && last_p12 == GPIO_PIN_RESET) {
-        iface_state.preset_id = 3;
+        iface_state.preset_id = 4;
         iface_state.dirty_flag = 1;
         Debug_Log("BUTTON: Preset 4 Active");
     }
     last_p12 = curr_p12;
 
+    // PRESET 5
+    if (curr_pc9 == GPIO_PIN_SET && last_pc9 == GPIO_PIN_RESET) {
+		iface_state.preset_id = 5;
+		iface_state.dirty_flag = 1;
+		Debug_Log("BUTTON: Preset 5 Active");
+	}
+	last_pc9 = curr_pc9;
+
 //        iface_state.dirty_flag = 0;
     if (iface_state.dirty_flag) {
         uint8_t uart_packet[7];
-        uart_packet[0] = iface_state.input_mode;
-        uart_packet[1] = iface_state.preset_id;
+        uart_packet[0] = iface_state.preset_id;
         for(int i = 0; i < 5; i++) {
-            uart_packet[i+2] = (uint8_t)(knob_raw[i] >> 4);
+            uart_packet[i+1] = (uint8_t)(knob_raw[i] >> 4);
         }
 
         // Send via UART1 (assuming you enabled it in CubeMX)
-        HAL_UART_Transmit(&huart1, uart_packet, 7, 10);
-        if (HAL_UART_Transmit(&huart1, uart_packet, 7, 10) == HAL_OK) {
+        HAL_UART_Transmit(&huart1, uart_packet, 6, 10);
+        if (HAL_UART_Transmit(&huart1, uart_packet, 6, 10) == HAL_OK) {
         	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_7, GPIO_PIN_SET);
         	HAL_Delay(50);
         	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_7, GPIO_PIN_RESET);

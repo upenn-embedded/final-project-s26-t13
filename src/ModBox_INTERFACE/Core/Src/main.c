@@ -63,7 +63,7 @@ void Debug_Log(const char* msg) {
 
 /* USER CODE BEGIN PV */
 uint16_t knob_raw[5] = {0, 0, 0, 0, 0};
-uint8_t packet[7];
+uint8_t packet[6];
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/

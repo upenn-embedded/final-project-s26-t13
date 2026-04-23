@@ -29,7 +29,6 @@
  * Synth parameter packet (7 bytes over UART)
  * -------------------------------------------------------------------------- */
 typedef struct {
-    uint8_t input_mode;   /* byte 0: 0 = CV */
     uint8_t preset_id;    /* byte 1: 0-3 selects module chain */
     uint8_t attack;       /* byte 2: 0-255 → envelope attack rate */
     uint8_t release;      /* byte 3: 0-255 → envelope release rate */
@@ -54,6 +53,7 @@ volatile bool     ic_first        = true;
 
 /* Last ADC reading — updated every ic_updated tick, read by debug print */
 static uint32_t  last_adc_raw   = 0;
+uint32_t last_gui_update = 0;
 
 /* --------------------------------------------------------------------------
  * Forward declarations
@@ -76,6 +76,7 @@ int main(void)
     MX_ADC1_Init();
     MX_TIM2_Init();                 /* PWM pitch output on PA5                 */
     MX_TIM3_Init();                 /* Input capture on PA6 (pitch tracking)   */
+    SynthDisplay_Init();
 
     /* Start peripherals */
     HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
@@ -85,7 +86,7 @@ int main(void)
     HAL_TIM_IC_Start_IT(&htim3, TIM_CHANNEL_1);
 
     /* Start UART DMA receive */
-    if (HAL_UART_Receive_DMA(&huart1, rx_buffer, 7) == HAL_OK) {
+    if (HAL_UART_Receive_DMA(&huart1, rx_buffer, 6) == HAL_OK) {
         HAL_GPIO_WritePin(GPIOB, GPIO_PIN_8, GPIO_PIN_RESET);
         HAL_Delay(1);
         HAL_GPIO_WritePin(GPIOB, GPIO_PIN_8, GPIO_PIN_SET);
@@ -179,16 +180,14 @@ int main(void)
             new_data_flag = false;
 
             /* Cache locally for atomic read */
-            synth.input_mode = rx_buffer[0];
-            synth.preset_id  = rx_buffer[1];
-            synth.attack     = rx_buffer[2];
-            synth.release    = rx_buffer[3];
-            synth.time       = rx_buffer[4];
-            synth.feedback   = rx_buffer[5];
+            synth.preset_id  = rx_buffer[0];
+            synth.attack     = rx_buffer[1];
+            synth.release    = rx_buffer[2];
+            synth.time       = rx_buffer[3];
+            synth.feedback   = rx_buffer[4];
 
             /* Apply all parameters to the pipeline in one call */
             Pipeline_ApplyParams(&pipeline,
-                                 synth.input_mode,
                                  synth.preset_id,
                                  synth.attack,
                                  synth.release,
@@ -197,12 +196,13 @@ int main(void)
 
             /* Debug: print preset name and all raw parameter values */
             static const char *preset_names[] = {
-                "0: CLEAN",
-                "1: WARM ECHO",
-                "2: LO-FI ECHO",
-                "3: LONG TAIL"
+                "1: CLEAN",
+                "2: WARM ECHO",
+                "3: LO-FI ECHO",
+                "4: LONG TAIL"
+				"5: unknown rn lol"
             };
-            const char *pname = (synth.preset_id < 4)
+            const char *pname = (synth.preset_id < 6)
                                  ? preset_names[synth.preset_id]
                                  : "?: UNKNOWN";
 
@@ -212,12 +212,25 @@ int main(void)
                      "[PRESET %s] CV:%4lumV SRC:%d ATK:%3d REL:%3d TIME:%3d FB:%3d",
                      pname,
                      (unsigned long)cv_mv,
-                     synth.input_mode,
                      synth.attack,
                      synth.release,
                      synth.time,
                      synth.feedback);
             Debug_Log(dbg);
+        }
+
+        if (HAL_GetTick() - last_gui_update > 33) {
+            last_gui_update = HAL_GetTick();
+
+            // Call the big function
+            SynthDisplay_Update(
+                synth.preset_id,
+                synth.attack,
+                synth.release,
+                synth.feedback,
+                vco_adc,            // Your raw ADC value
+                myPipeline.envelope.gain // The live volume from your audio code
+            );
         }
     }
 }
@@ -255,11 +268,11 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
         /* NOTE: Pipeline_ApplyParams() is NOT called here — it runs from
          * the main loop once new_data_flag is checked.  This keeps the ISR
          * short and avoids calling floating-point math from interrupt context. */
-        HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_7);
+        // HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_7);
         new_data_flag = true;
 
         /* Restart DMA for the next packet */
-        HAL_UART_Receive_DMA(&huart1, rx_buffer, 7);
+        HAL_UART_Receive_DMA(&huart1, rx_buffer, 6);
     }
 }
 
