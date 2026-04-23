@@ -1,6 +1,5 @@
 # Video Demo
 
-
 <div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden;">
   <iframe
     src="https://www.youtube.com/embed/n3K_fZDvINs"
@@ -24,7 +23,7 @@ In this demo, we will give an overview of the design process and a demostration 
 
 # SRS
 
-**Features:**
+#### **Features:**
 
 * SRS 01: ADC Input - we use the ADC input pins to track the potentiometer-based voltage divider output (the user’s control knobs).
 * SRS 02: Interrupts - we use interrupts to track the user’s button presses when they want to switch modes or routing.
@@ -33,10 +32,9 @@ In this demo, we will give an overview of the design process and a demostration 
 * SRS 06: Signal routing - Module routing requires a specific sequence of events: the oscillator produces the periodic waveform, the different modules (digital and analog) shape the tone of sound, and the analog amplifier is the final stage before the speaker. Because of this, we route our input signal through the STM32 __ pin so that it can apply / route to modules.
 * SRS 05: Envelope Generator - The envelope generator is one of our digital modules. We digitally envelope our signal
 
-**Validation:**
+#### **Validation:**
 
-UART Demo
-
+**UART Demo**
 
 <div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden;">
   <iframe
@@ -48,9 +46,18 @@ UART Demo
   </iframe>
 </div>
 
-ADC Demo
+Caption
 
-**Comments:** 
+
+
+**ADC Demo**
+
+Video
+
+Caption
+
+
+#### **Comments:**
 
 We originally chose STMs as our MCU for their I2S capabilities, but we really struggled with the implementation and eventually had to give up for the sake of our MVP Demo. Despite the switch up, we were able to successfully implement UART communication instead of I2S on top of learning how to use a completely new MCU.
 
@@ -58,7 +65,7 @@ We originally chose STMs as our MCU for their I2S capabilities, but we really st
 
 # HRS
 
-**Features:**
+#### **Features:**
 
 * HRS 01: Speaker choice.
 * HRS 02: 5 push buttons representing an input type switch option and 4 presets.
@@ -72,13 +79,24 @@ We originally chose STMs as our MCU for their I2S capabilities, but we really st
 * HRS 07: PMOS Buck Converter - We have a buck converter to step down our 9V to ~3.3V so that it is safe to be imputed into our MCU. Because our gate signal is 3.3Vpp and our output is roughly 3.3V, we opted to use a PMOS buck converter design and made a gate level shifter on top of that.
   image
 
-**Validation:**
+## **Validation:**
 
-Buck Scope
+**PMOS Buck Validation**
 
 ![BuckScope](./images/validation/scope_60.png)
 
-**Comments:** 
+The input voltage (9V) is in blue, the level shifted gate signal is in green, and the output voltage (~3V) is in yellow.
+
+
+
+**Speaker Amplifier Validation**
+
+Video
+
+Caption
+
+
+#### **Comments:**
 
 With the analog side of our project, we faced major issues with noise and impedance transfer. A lot of times our circuits worked fine on their own or with the function generator input, but would stop functioning upon integration with the rest of the build. We had to play around a lot with filters and buffers, and not everything worked in the end. As a result, we are super proud of our modules that do successfully produce sound, whether through analog or digital routing. It was no easy feat!
 
