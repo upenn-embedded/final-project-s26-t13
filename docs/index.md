@@ -76,6 +76,8 @@ We originally chose STMs as our MCU for their I2S capabilities, but we really st
 
 Buck Scope
 
+![BuckScope](../images/validation/scope_60.png)
+
 **Comments:** 
 
 With the analog side of our project, we faced major issues with noise and impedance transfer. A lot of times our circuits worked fine on their own or with the function generator input, but would stop functioning upon integration with the rest of the build. We had to play around a lot with filters and buffers, and not everything worked in the end. As a result, we are super proud of our modules that do successfully produce sound, whether through analog or digital routing. It was no easy feat!
