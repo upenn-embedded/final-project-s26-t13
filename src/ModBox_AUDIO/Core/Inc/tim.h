@@ -3,17 +3,7 @@
   ******************************************************************************
   * @file    tim.h
   * @brief   This file contains all the function prototypes for
-  *          the tim.c file
-  ******************************************************************************
-  * @attention
-  *
-  * Copyright (c) 2026 STMicroelectronics.
-  * All rights reserved.
-  *
-  * This software is licensed under terms that can be found in the LICENSE file
-  * in the root directory of this software component.
-  * If no LICENSE file comes with this software, it is provided AS-IS.
-  *
+  * the tim.c file
   ******************************************************************************
   */
 /* USER CODE END Header */
@@ -32,7 +22,10 @@ extern "C" {
 
 /* USER CODE END Includes */
 
+/* External handle for the Timer so main.c and interrupts can see it */
 extern TIM_HandleTypeDef htim2;
+extern TIM_HandleTypeDef htim3;
+void MX_TIM3_Init(void);
 
 /* USER CODE BEGIN Private defines */
 
@@ -40,6 +33,7 @@ extern TIM_HandleTypeDef htim2;
 
 void MX_TIM2_Init(void);
 
+/* Prototype for PostInit (where GPIO pins are mapped) */
 void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
 
 /* USER CODE BEGIN Prototypes */
@@ -51,4 +45,3 @@ void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
 #endif
 
 #endif /* __TIM_H__ */
-

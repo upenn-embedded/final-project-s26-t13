@@ -25,13 +25,15 @@
 /* USER CODE END 0 */
 
 ADC_HandleTypeDef hadc1;
+// DMA_HandleTypeDef hdma_adc1; // <--- This MUST be here to "exist" in memory
 
 /* ADC1 init function */
 void MX_ADC1_Init(void)
 {
 
   /* USER CODE BEGIN ADC1_Init 0 */
-
+	__HAL_RCC_ADC_FORCE_RESET();
+	__HAL_RCC_ADC_RELEASE_RESET();
   /* USER CODE END ADC1_Init 0 */
 
   ADC_ChannelConfTypeDef sConfig = {0};
@@ -96,7 +98,7 @@ void HAL_ADC_MspInit(ADC_HandleTypeDef* adcHandle)
     HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
     /* ADC1 interrupt Init */
-    HAL_NVIC_SetPriority(ADC_IRQn, 0, 0);
+    HAL_NVIC_SetPriority(ADC_IRQn, 1, 0);
     HAL_NVIC_EnableIRQ(ADC_IRQn);
   /* USER CODE BEGIN ADC1_MspInit 1 */
 

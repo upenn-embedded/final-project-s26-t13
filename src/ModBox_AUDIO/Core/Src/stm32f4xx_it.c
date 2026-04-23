@@ -56,7 +56,10 @@
 
 /* External variables --------------------------------------------------------*/
 extern ADC_HandleTypeDef hadc1;
+extern DMA_HandleTypeDef hdma_usart1_rx;
 extern UART_HandleTypeDef huart1;
+extern TIM_HandleTypeDef htim3;
+
 /* USER CODE BEGIN EV */
 
 /* USER CODE END EV */
@@ -92,6 +95,11 @@ void HardFault_Handler(void)
     /* USER CODE BEGIN W1_HardFault_IRQn 0 */
     /* USER CODE END W1_HardFault_IRQn 0 */
   }
+}
+
+void TIM3_IRQHandler(void)
+{
+    HAL_TIM_IRQHandler(&htim3);
 }
 
 /**
@@ -212,6 +220,16 @@ void ADC_IRQHandler(void)
 
   /* USER CODE END ADC_IRQn 1 */
 }
+
+void DMA2_Stream2_IRQHandler(void) {
+  HAL_DMA_IRQHandler(&hdma_usart1_rx);
+}
+
+//extern DMA_HandleTypeDef hdma_adc1;
+
+//void DMA2_Stream0_IRQHandler(void) {
+//  HAL_DMA_IRQHandler(&hdma_adc1);
+//}
 
 /**
   * @brief This function handles USART1 global interrupt.
