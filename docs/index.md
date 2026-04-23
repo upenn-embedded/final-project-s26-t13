@@ -76,7 +76,7 @@ We originally chose STMs as our MCU for their I2S capabilities, but we really st
 
 Buck Scope
 
-![BuckScope](../images/validation/scope_60.png)
+![BuckScope](./images/validation/scope_60.png)
 
 **Comments:** 
 
