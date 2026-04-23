@@ -28,7 +28,7 @@ void Interface_Init(void) {
 	}
 
 	Debug_Log("--- Interface Online: BUSY Flag Cleared ---");
-    Debug_Log("Controls: PC13 (Toggle Mode), PA9-PA12 (Presets), 5 ADC Knobs");
+    Debug_Log("Controls: (Toggle Mode), PA9-PA12 (Presets), 5 ADC Knobs");
 }
 
 void Interface_Update(void) {
@@ -112,22 +112,6 @@ void Interface_Update(void) {
     }
     last_p12 = curr_p12;
 
-    /* --- I2C TRANSMISSION --- */
-//    if (iface_state.dirty_flag) {
-//        uint8_t i2c_packet[7];
-//        i2c_packet[0] = iface_state.input_mode;
-//        i2c_packet[1] = iface_state.preset_id;
-//
-//        for(int i = 0; i < 5; i++) {
-//            // Scale 12-bit to 8-bit for the Audio STM
-//            i2c_packet[i+2] = (uint8_t)(knob_raw[i] >> 4);
-//        }
-//
-//        // Transmit to Audio Board (0x12)
-//        if (HAL_I2C_Master_Transmit(&hi2c1, (0x12 << 1), i2c_packet, 7, 5) == HAL_OK) {
-//        }
-//	}
-//
 //        iface_state.dirty_flag = 0;
     if (iface_state.dirty_flag) {
         uint8_t uart_packet[7];
@@ -139,8 +123,15 @@ void Interface_Update(void) {
 
         // Send via UART1 (assuming you enabled it in CubeMX)
         HAL_UART_Transmit(&huart1, uart_packet, 7, 10);
+        if (HAL_UART_Transmit(&huart1, uart_packet, 7, 10) == HAL_OK) {
+        	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_7, GPIO_PIN_SET);
+        	HAL_Delay(50);
+        	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_7, GPIO_PIN_RESET);
+            Debug_Log("UART Sent");
+
+        }
+        HAL_Delay(30);
 
         iface_state.dirty_flag = 0;
-        Debug_Log("UART Sent");
     }
 }

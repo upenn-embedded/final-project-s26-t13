@@ -71,6 +71,8 @@ void Error_Handler(void);
 #define TCK_GPIO_Port GPIOA
 #define SWO_Pin GPIO_PIN_3
 #define SWO_GPIO_Port GPIOB
+#define MIC_PIN GPIO_PIN_1
+#define MIC_PORT GPIOA
 
 /* USER CODE BEGIN Private defines */
 

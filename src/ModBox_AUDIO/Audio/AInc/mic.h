@@ -14,9 +14,4 @@
  */
 float Mic_ReadSample(void);
 
-/**
- * @brief (Optional) Calibrates the mic offset if your silence isn't 2048.
- */
-void Mic_Calibrate(void);
-
-#endif /* INC_MIC_H_ */
+#endif

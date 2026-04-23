@@ -8,7 +8,6 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include "main.h"
-#include "audio.h"
 #include "envelope.h"
 #include "echo.h"
 #include "discretizer.h"

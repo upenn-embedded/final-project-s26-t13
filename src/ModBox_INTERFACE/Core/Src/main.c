@@ -64,6 +64,7 @@ void Debug_Log(const char* msg) {
 
 /* USER CODE BEGIN PV */
 uint16_t knob_raw[5] = {0, 0, 0, 0, 0};
+uint8_t packet[7];
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -85,7 +86,7 @@ int main(void)
 {
 
   /* USER CODE BEGIN 1 */
-	HAL_GPIO_DeInit(GPIOA, GPIO_PIN_10);
+  HAL_GPIO_DeInit(GPIOA, GPIO_PIN_10);
 
   /* USER CODE END 1 */
 
@@ -122,9 +123,10 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
-
-    /* USER CODE BEGIN 3 */
 	  Interface_Update();
+	  // 3. Throttle the loop (30ms as discussed)
+	  HAL_Delay(30);
+    /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
 }
