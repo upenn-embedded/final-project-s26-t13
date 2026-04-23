@@ -16,8 +16,11 @@ In this demo, we will give an overview of the design process and a demostration 
 
 # Images
 
+![WebsiteImageFilter](./images/WebsiteImageFilter.png)
 
-**400x400 Image:**
+![SpeakerAmp](./images/WebsiteSpeakerAmp.png)
+
+###### **400x400 Image:**
 
 ---
 
