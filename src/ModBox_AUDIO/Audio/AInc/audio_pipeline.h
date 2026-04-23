@@ -54,7 +54,6 @@ typedef struct {
     uint32_t dither_n;
 
     /* Routing */
-    InputSource_t source;
     uint8_t       active_preset;
 } AudioPipeline_t;
 
@@ -63,13 +62,11 @@ typedef struct {
  * -------------------------------------------------------------------------- */
 void  Pipeline_Init(AudioPipeline_t *p);
 float Pipeline_Process(AudioPipeline_t *p, float input_sample, bool hardware_gate);
-void  Pipeline_SetSource(AudioPipeline_t *p, InputSource_t source);
 void  Pipeline_SetPreset(AudioPipeline_t *p, uint8_t preset_id);
 
 /* Apply the full SynthParams packet received over UART.
  * Call this whenever new_data_flag fires in main. */
 void  Pipeline_ApplyParams(AudioPipeline_t *p,
-                           uint8_t input_mode,
                            uint8_t preset_id,
                            uint8_t attack,
                            uint8_t release_val,

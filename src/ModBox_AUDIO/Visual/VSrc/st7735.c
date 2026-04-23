@@ -16,6 +16,7 @@
  ******************************************************************************/
 
 #include "ST7735.h"
+#include "spi.h"
 
 /* --------------------------------------------------------------------------
  * Delay wrapper
@@ -45,6 +46,15 @@ void SPI_ControllerTx(uint8_t data)
 void SPI_ControllerTx_stream(uint8_t stream)
 {
     HAL_SPI_Transmit(&hspi2, &stream, 1, 10);
+}
+
+void SPI_ControllerTx_Fast(uint8_t data) {
+    // Wait until transmit buffer is empty
+    while (!(SPI2->SR & SPI_SR_TXE));
+    // Send data directly to the data register
+    *((__IO uint8_t *)&SPI2->DR) = data;
+    // Wait until busy flag is cleared
+    while (SPI2->SR & SPI_SR_BSY);
 }
 
 /* Send 16-bit colour word, toggling CS */

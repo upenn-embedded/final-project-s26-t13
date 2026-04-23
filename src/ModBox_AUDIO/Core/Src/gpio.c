@@ -74,6 +74,12 @@ void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
+  /* 2. Configure LCD Control Pins: PB12(CS), PB1(DC), PB2(RST) */
+  GPIO_InitStruct.Pin = GPIO_PIN_12 | GPIO_PIN_1 | GPIO_PIN_2;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;   // Push-Pull
+  GPIO_InitStruct.Pull = GPIO_NOPULL;           // No external/internal pull needed
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;  // Low speed is fine for these toggles
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 }
 
 /* USER CODE BEGIN 2 */

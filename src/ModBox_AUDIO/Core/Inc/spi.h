@@ -1,13 +1,10 @@
-/*
- * spi.h
- *
- *  Created on: Apr 23, 2026
- *      Author: bhavyasurapaneni
- */
+#ifndef __SPI_H__
+#define __SPI_H__
 
-#ifndef INC_SPI_H_
-#define INC_SPI_H_
+#include "main.h"  /* This MUST be here to define SPI_HandleTypeDef */
 
+extern SPI_HandleTypeDef hspi2;
 
+void MX_SPI2_Init(void);
 
-#endif /* INC_SPI_H_ */
+#endif /* __SPI_H__ */

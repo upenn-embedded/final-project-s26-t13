@@ -20,6 +20,7 @@
 #include "usart.h"
 #include "gpio.h"
 #include "audio_pipeline.h"    /* <-- pipeline header */
+#include "synth_display.h"
 
 #include <string.h>
 #include <stdio.h>
@@ -200,7 +201,7 @@ int main(void)
                 "2: WARM ECHO",
                 "3: LO-FI ECHO",
                 "4: LONG TAIL"
-				"5: unknown rn lol"
+				"5: UNKNOWN"
             };
             const char *pname = (synth.preset_id < 6)
                                  ? preset_names[synth.preset_id]
@@ -209,7 +210,7 @@ int main(void)
             char dbg[80];
             uint32_t cv_mv = (last_adc_raw * 3300UL) / 4095UL;  /* raw → mV */
             snprintf(dbg, sizeof(dbg),
-                     "[PRESET %s] CV:%4lumV SRC:%d ATK:%3d REL:%3d TIME:%3d FB:%3d",
+            		"[PRESET %s] CV:%4lumV ATK:%3d REL:%3d TIME:%3d FB:%3d",
                      pname,
                      (unsigned long)cv_mv,
                      synth.attack,
@@ -227,9 +228,10 @@ int main(void)
                 synth.preset_id,
                 synth.attack,
                 synth.release,
+				synth.time,
                 synth.feedback,
-                vco_adc,            // Your raw ADC value
-                myPipeline.envelope.gain // The live volume from your audio code
+                last_adc_raw,
+                pipeline.envelope.current_amplitude
             );
         }
     }

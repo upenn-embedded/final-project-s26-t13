@@ -25,17 +25,20 @@
  * Chains are processed left-to-right; MOD_NONE terminates early.
  * -------------------------------------------------------------------------- */
 static const Preset_t preset_table[] = {
-    /* 0 – Clean: straight to envelope */
-    { .chain = { MOD_ENVELOPE,    MOD_NONE, MOD_NONE, MOD_NONE } },
+    /* 1 – Clean: straight to envelope */
+    { .chain = { MOD_NONE,    MOD_NONE, MOD_NONE, MOD_NONE } },
 
-    /* 1 – Echo: echo colours the signal before the envelope shapes it */
+    /* 2 – Echo: echo colours the signal before the envelope shapes it */
     { .chain = { MOD_ECHO,        MOD_ENVELOPE, MOD_NONE, MOD_NONE } },
 
-    /* 2 – Lo-Fi Echo: short echo delay into envelope */
+    /* 3 – Lo-Fi Echo: short echo delay into envelope */
     { .chain = { MOD_ECHO, MOD_ENVELOPE, MOD_NONE, MOD_NONE } },
 
-    /* 3 – Long Tail: echo feeds into a slow-release envelope */
+    /* 4 – Long Tail: echo feeds into a slow-release envelope */
     { .chain = { MOD_ECHO,        MOD_ENVELOPE, MOD_NONE, MOD_NONE } },
+
+	/* 5 – Some unknown 5th thing */
+	{ .chain = { MOD_ENVELOPE, MOD_NONE, MOD_NONE, MOD_NONE } },
 };
 
 #define NUM_PRESETS  ((uint8_t)(sizeof(preset_table) / sizeof(preset_table[0])))
@@ -93,7 +96,6 @@ void Pipeline_Init(AudioPipeline_t *p)
 {
     Envelope_Init(&p->envelope);
     Echo_Init(&p->echo, 500);
-    p->source        = SOURCE_CV;
     p->active_preset = 0;
     p->lp_state      = 0.0f;
     p->dither_n      = 0;
@@ -191,14 +193,6 @@ pipeline_done:
 }
 
 /* --------------------------------------------------------------------------
- * Pipeline_SetSource
- * -------------------------------------------------------------------------- */
-void Pipeline_SetSource(AudioPipeline_t *p, InputSource_t source)
-{
-    p->source = source;
-}
-
-/* --------------------------------------------------------------------------
  * Pipeline_SetPreset
  * -------------------------------------------------------------------------- */
 void Pipeline_SetPreset(AudioPipeline_t *p, uint8_t preset_id)
@@ -215,16 +209,12 @@ void Pipeline_SetPreset(AudioPipeline_t *p, uint8_t preset_id)
  * pushes them into every module so the pipeline is always in sync.
  * -------------------------------------------------------------------------- */
 void Pipeline_ApplyParams(AudioPipeline_t *p,
-                          uint8_t input_mode,
                           uint8_t preset_id,
                           uint8_t attack,
                           uint8_t release_val,
                           uint8_t time_val,
                           uint8_t feedback)
 {
-    /* Source selection: byte 0  (0 = CV, anything else = internal) */
-    Pipeline_SetSource(p, (input_mode == 0) ? SOURCE_CV : SOURCE_CV);
-
     /* Preset / module order: byte 1 */
     Pipeline_SetPreset(p, preset_id);
 

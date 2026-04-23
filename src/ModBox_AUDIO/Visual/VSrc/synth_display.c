@@ -2,6 +2,7 @@
 #include "LCD_GFX.h"
 #include "ST7735.h"
 #include <stdio.h>
+#include "spi.h"
 
 static uint8_t last_preset = 99;
 static uint8_t scroll_x = 0;
