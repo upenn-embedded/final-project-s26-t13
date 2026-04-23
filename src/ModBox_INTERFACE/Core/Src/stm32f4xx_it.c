@@ -66,6 +66,22 @@ extern DMA_HandleTypeDef hdma_adc1;
 /**
   * @brief This function handles Non maskable interrupt.
   */
+
+extern UART_HandleTypeDef huart1;
+extern UART_HandleTypeDef huart2;
+
+void USART1_IRQHandler(void)
+{
+  HAL_UART_IRQHandler(&huart1);
+}
+
+void USART2_IRQHandler(void)
+{
+  HAL_UART_IRQHandler(&huart2);
+}
+
+
+
 void NMI_Handler(void)
 {
   /* USER CODE BEGIN NonMaskableInt_IRQn 0 */

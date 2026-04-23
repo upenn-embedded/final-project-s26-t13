@@ -46,7 +46,6 @@ SynthState_t synth_state = {0, 0, 0};
 void Debug_Log(const char* msg) {
     HAL_UART_Transmit(&huart2, (uint8_t*)msg, strlen(msg), 100);
     HAL_UART_Transmit(&huart2, (uint8_t*)"\r\n", 2, 10);
-	while (__HAL_UART_GET_FLAG(&huart2, UART_FLAG_TC) == RESET);
 }
 /* USER CODE END PTD */
 
@@ -176,6 +175,9 @@ void SystemClock_Config(void)
     Error_Handler();
   }
 }
+
+
+
 
 /* USER CODE BEGIN 4 */
 
