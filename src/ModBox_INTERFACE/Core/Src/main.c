@@ -22,6 +22,9 @@
 #include "dma.h"
 #include "usart.h"
 #include "gpio.h"
+#include "spi.h"
+#include "synth_display.h"
+#include "lcd_gfx.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -63,7 +66,7 @@ void Debug_Log(const char* msg) {
 
 /* USER CODE BEGIN PV */
 uint16_t knob_raw[5] = {0, 0, 0, 0, 0};
-uint8_t packet[6];
+uint8_t packet[5];
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -111,10 +114,16 @@ int main(void)
   MX_USART2_UART_Init();
   MX_ADC1_Init();
   MX_USART1_UART_Init();
+  MX_SPI2_Init();/* Input capture on PA6 (pitch tracking)   */
+
   /* USER CODE BEGIN 2 */
+
+//  HAL_UART_Transmit(&huart2, (uint8_t*)"System Ready. Press Buttons...\r\n", 32, 100);
+//  Interface_Init();
+  lcd_init();
+  SynthDisplay_Init();
+
   HAL_ADC_Start_DMA(&hadc1, (uint32_t*)knob_raw, 5);
-  HAL_UART_Transmit(&huart2, (uint8_t*)"System Ready. Press Buttons...\r\n", 32, 100);
-  Interface_Init();
   /* USER CODE END 2 */
 
   /* Infinite loop */

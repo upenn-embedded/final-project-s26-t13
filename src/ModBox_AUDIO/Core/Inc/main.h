@@ -65,6 +65,8 @@ void Error_Handler(void);
 #define preset_3_GPIO_Port GPIOA
 #define preset_4_Pin GPIO_PIN_12
 #define preset_4_GPIO_Port GPIOA
+#define preset_5_Pin GPIO_PIN_9
+#define preset_5_GPIO_Port GPIOC
 #define TMS_Pin GPIO_PIN_13
 #define TMS_GPIO_Port GPIOA
 #define TCK_Pin GPIO_PIN_14
@@ -73,6 +75,8 @@ void Error_Handler(void);
 #define SWO_GPIO_Port GPIOB
 #define MIC_PIN GPIO_PIN_1
 #define MIC_PORT GPIOA
+
+
 
 /* USER CODE BEGIN Private defines */
 

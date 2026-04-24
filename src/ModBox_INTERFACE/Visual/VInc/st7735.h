@@ -41,13 +41,15 @@ extern SPI_HandleTypeDef hspi2;
  * GPIO pin definitions — change here if you rewire
  * -------------------------------------------------------------------------- */
 #define LCD_CS_PORT     GPIOB
-#define LCD_CS_PIN      GPIO_PIN_12
+#define LCD_CS_PIN      GPIO_PIN_10
 
-#define LCD_DC_PORT     GPIOA
-#define LCD_DC_PIN      GPIO_PIN_8
+#define LCD_DC_PORT     GPIOB
+#define LCD_DC_PIN      GPIO_PIN_1
 
-#define LCD_RST_PORT    GPIOA
-#define LCD_RST_PIN     GPIO_PIN_9
+#define LCD_RST_PORT    GPIOB
+#define LCD_RST_PIN     GPIO_PIN_2
+
+
 
 /* --------------------------------------------------------------------------
  * Convenience macros — replace AVR set()/clear() with HAL calls

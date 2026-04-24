@@ -84,9 +84,9 @@ void HAL_UART_MspInit(UART_HandleTypeDef* uartHandle)
     __HAL_LINKDMA(uartHandle, hdmarx, hdma_usart1_rx);
 
     /* 4. NVIC Configuration */
-    HAL_NVIC_SetPriority(USART1_IRQn, 1, 0);
+    HAL_NVIC_SetPriority(USART1_IRQn, 3, 0);
     HAL_NVIC_EnableIRQ(USART1_IRQn);
-    HAL_NVIC_SetPriority(DMA2_Stream2_IRQn, 1, 0);
+    HAL_NVIC_SetPriority(DMA2_Stream2_IRQn, 3, 0);
     HAL_NVIC_EnableIRQ(DMA2_Stream2_IRQn);
   }
   else if(uartHandle->Instance==USART2)

@@ -4,9 +4,11 @@
 #include <stdlib.h>
 #include "main.h"
 #include "usart.h"
+#include "spi.h"
+#include "synth_display.h"
 
 extern UART_HandleTypeDef huart2;
-extern uint16_t knob_raw[5];
+extern uint16_t knob_raw[4];
 
 InterfaceState_t iface_state = {0};
 
@@ -43,7 +45,7 @@ void Interface_Update(void) {
 
 
     // Memory for knob changes - MUST be static to persist between calls!
-    static uint16_t last_knobs[5] = {0};
+    static uint16_t last_knobs[4] = {0};
     static int threshold = 150;
 
     // 1. Timer Check (Run every 50ms)
@@ -51,7 +53,7 @@ void Interface_Update(void) {
     last_tick = HAL_GetTick();
 
     /* --- KNOB LOGIC --- */
-    for (int i = 0; i < 5; i++) {
+    for (int i = 0; i < 4; i++) {
         int diff = abs((int)knob_raw[i] - (int)last_knobs[i]);
         int knob_num = i+1;
         if (diff > threshold) {
@@ -61,8 +63,8 @@ void Interface_Update(void) {
 
             // UART Debug for Knobs
             char buf[32];
-            sprintf(buf, "KNOB %d: %d", knob_num, knob_raw[i]);
-            Debug_Log(buf);
+           sprintf(buf, "KNOB %d: %d", knob_num, knob_raw[i]);
+           Debug_Log(buf);
         }
     }
 
@@ -116,22 +118,27 @@ void Interface_Update(void) {
 
 //        iface_state.dirty_flag = 0;
     if (iface_state.dirty_flag) {
-        uint8_t uart_packet[7];
+        uint8_t uart_packet[5];
         uart_packet[0] = iface_state.preset_id;
-        for(int i = 0; i < 5; i++) {
-            uart_packet[i+1] = (uint8_t)(knob_raw[i] >> 4);
+        for(int i = 0; i < 4; i++) {
+            uart_packet[i+1] = (uint8_t)(knob_raw[i] >> 3);
         }
 
         // Send via UART1 (assuming you enabled it in CubeMX)
-        HAL_UART_Transmit(&huart1, uart_packet, 6, 10);
-        if (HAL_UART_Transmit(&huart1, uart_packet, 6, 10) == HAL_OK) {
-        	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_7, GPIO_PIN_SET);
-        	HAL_Delay(50);
-        	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_7, GPIO_PIN_RESET);
+        HAL_UART_Transmit(&huart1, uart_packet, 5, 10);
+        if (HAL_UART_Transmit(&huart1, uart_packet, 5, 10) == HAL_OK) {
+        	HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_7);
             Debug_Log("UART Sent");
 
         }
-        HAL_Delay(30);
+
+  	    SynthDisplay_Update(
+  	      iface_state.preset_id,
+		  iface_state.knobs[0],
+		  iface_state.knobs[1],
+		  iface_state.knobs[2],
+		  iface_state.knobs[3]
+		);
 
         iface_state.dirty_flag = 0;
     }

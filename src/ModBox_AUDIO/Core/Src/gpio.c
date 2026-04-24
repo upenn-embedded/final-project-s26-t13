@@ -51,10 +51,10 @@ void MX_GPIO_Init(void)
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin : PC13 */
-  GPIO_InitStruct.Pin = GPIO_PIN_13;
-  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+//  GPIO_InitStruct.Pin = GPIO_PIN_13;
+//  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+//  GPIO_InitStruct.Pull = GPIO_NOPULL;
+//  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
   /*Configure GPIO pin : preset_1_Pin */
   GPIO_InitStruct.Pin = preset_1_Pin;
@@ -75,10 +75,10 @@ void MX_GPIO_Init(void)
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
   /* 2. Configure LCD Control Pins: PB12(CS), PB1(DC), PB2(RST) */
-  GPIO_InitStruct.Pin = GPIO_PIN_12 | GPIO_PIN_1 | GPIO_PIN_2;
+  GPIO_InitStruct.Pin = GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_10;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;   // Push-Pull
   GPIO_InitStruct.Pull = GPIO_NOPULL;           // No external/internal pull needed
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;  // Low speed is fine for these toggles
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;  // Low speed is fine for these toggles
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 }
 

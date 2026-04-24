@@ -20,7 +20,7 @@
 #include "usart.h"
 #include "gpio.h"
 #include "audio_pipeline.h"    /* <-- pipeline header */
-#include "synth_display.h"
+#include "spi.h"
 
 #include <string.h>
 #include <stdio.h>
@@ -43,7 +43,7 @@ typedef struct {
 SynthParams_t    synth          = {0};
 AudioPipeline_t  pipeline;                  /* <-- pipeline instance */
 
-uint8_t          rx_buffer[7];
+uint8_t          rx_buffer[5];
 volatile bool    new_data_flag  = false;
 
 volatile uint32_t ic_period      = 0;
@@ -69,6 +69,9 @@ int main(void)
 {
     HAL_Init();
     SystemClock_Config();
+	SynthDisplay_Init();
+	lcd_init();
+	LCD_setScreen(RED);
 
     MX_GPIO_Init();
     MX_DMA_Init();
@@ -76,8 +79,9 @@ int main(void)
     MX_USART1_UART_Init();          /* Interface UART (7-byte packets)         */
     MX_ADC1_Init();
     MX_TIM2_Init();                 /* PWM pitch output on PA5                 */
-    MX_TIM3_Init();                 /* Input capture on PA6 (pitch tracking)   */
-    SynthDisplay_Init();
+    MX_TIM3_Init();
+//
+    MX_SPI2_Init();/* Input capture on PA6 (pitch tracking)   */
 
     /* Start peripherals */
     HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
@@ -87,7 +91,7 @@ int main(void)
     HAL_TIM_IC_Start_IT(&htim3, TIM_CHANNEL_1);
 
     /* Start UART DMA receive */
-    if (HAL_UART_Receive_DMA(&huart1, rx_buffer, 6) == HAL_OK) {
+    if (HAL_UART_Receive_DMA(&huart1, rx_buffer, 5) == HAL_OK) {
         HAL_GPIO_WritePin(GPIOB, GPIO_PIN_8, GPIO_PIN_RESET);
         HAL_Delay(1);
         HAL_GPIO_WritePin(GPIOB, GPIO_PIN_8, GPIO_PIN_SET);
@@ -105,6 +109,7 @@ int main(void)
 
     while (1)
     {
+
         /* -------------------------------------------------------------------
          * 1. AUDIO PROCESSING
          *
@@ -200,39 +205,17 @@ int main(void)
                 "1: CLEAN",
                 "2: WARM ECHO",
                 "3: LO-FI ECHO",
-                "4: LONG TAIL"
+                "4: LONG TAIL",
 				"5: UNKNOWN"
             };
             const char *pname = (synth.preset_id < 6)
                                  ? preset_names[synth.preset_id]
                                  : "?: UNKNOWN";
 
-            char dbg[80];
-            uint32_t cv_mv = (last_adc_raw * 3300UL) / 4095UL;  /* raw → mV */
-            snprintf(dbg, sizeof(dbg),
-            		"[PRESET %s] CV:%4lumV ATK:%3d REL:%3d TIME:%3d FB:%3d",
-                     pname,
-                     (unsigned long)cv_mv,
-                     synth.attack,
-                     synth.release,
-                     synth.time,
-                     synth.feedback);
-            Debug_Log(dbg);
         }
 
         if (HAL_GetTick() - last_gui_update > 33) {
             last_gui_update = HAL_GetTick();
-
-            // Call the big function
-            SynthDisplay_Update(
-                synth.preset_id,
-                synth.attack,
-                synth.release,
-				synth.time,
-                synth.feedback,
-                last_adc_raw,
-                pipeline.envelope.current_amplitude
-            );
         }
     }
 }
@@ -274,7 +257,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
         new_data_flag = true;
 
         /* Restart DMA for the next packet */
-        HAL_UART_Receive_DMA(&huart1, rx_buffer, 6);
+        HAL_UART_Receive_DMA(&huart1, rx_buffer, 5);
     }
 }
 

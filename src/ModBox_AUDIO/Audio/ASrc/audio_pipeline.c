@@ -26,19 +26,19 @@
  * -------------------------------------------------------------------------- */
 static const Preset_t preset_table[] = {
     /* 1 – Clean: straight to envelope */
-    { .chain = { MOD_NONE,    MOD_NONE, MOD_NONE, MOD_NONE } },
+    { .chain = { MOD_NONE,  MOD_NONE, MOD_NONE, MOD_NONE } },
 
     /* 2 – Echo: echo colours the signal before the envelope shapes it */
-    { .chain = { MOD_ECHO,        MOD_ENVELOPE, MOD_NONE, MOD_NONE } },
+    { .chain = { MOD_ECHO,        MOD_NONE, MOD_NONE, MOD_NONE } },
 
     /* 3 – Lo-Fi Echo: short echo delay into envelope */
-    { .chain = { MOD_ECHO, MOD_ENVELOPE, MOD_NONE, MOD_NONE } },
+    { .chain = { MOD_ENVELOPE, MOD_NONE, MOD_NONE, MOD_NONE } },
 
     /* 4 – Long Tail: echo feeds into a slow-release envelope */
     { .chain = { MOD_ECHO,        MOD_ENVELOPE, MOD_NONE, MOD_NONE } },
 
 	/* 5 – Some unknown 5th thing */
-	{ .chain = { MOD_ENVELOPE, MOD_NONE, MOD_NONE, MOD_NONE } },
+	{ .chain = { MOD_ENVELOPE, MOD_ECHO, MOD_NONE, MOD_NONE } },
 };
 
 #define NUM_PRESETS  ((uint8_t)(sizeof(preset_table) / sizeof(preset_table[0])))
@@ -63,31 +63,31 @@ static inline uint32_t byte_to_samples(uint8_t b, uint32_t min, uint32_t max)
 /* Soft clipper — cubic waveshaper, models tube saturation.
  * Input and output are in the normalised [-1.0, +1.0] range.
  * Rounds off peaks instead of hard-clipping, removing harshness. */
-static inline float softclip(float x)
-{
-    if (x >  1.0f) return  1.0f;
-    if (x < -1.0f) return -1.0f;
-    return x - (x * x * x) * 0.3333f;   /* x - x³/3  (tanh approximation) */
-}
-
-/* One-pole IIR low-pass — single multiply-add per sample.
- * coeff: 0.0 = no filtering (dry), higher = darker/warmer.
- * 0.15 rolls off gently above ~1kHz at 8kHz sample rate.          */
-#define LP_COEFF  0.15f
-
-static inline float lp_tick(float *state, float x)
-{
-    *state += LP_COEFF * (x - *state);
-    return *state;
-}
-
-/* 1-bit rectangular dither — breaks up quantisation patterns.
- * Alternates +1/-1 each sample; crude but effective and free.      */
-static inline float dither(uint32_t *n)
-{
-    *n += 1;
-    return (*n & 1) ? 1.0f : -1.0f;
-}
+//static inline float softclip(float x)
+//{
+//    if (x >  1.0f) return  1.0f;
+//    if (x < -1.0f) return -1.0f;
+//    return x - (x * x * x) * 0.3333f;   /* x - x³/3  (tanh approximation) */
+//}
+//
+///* One-pole IIR low-pass — single multiply-add per sample.
+// * coeff: 0.0 = no filtering (dry), higher = darker/warmer.
+// * 0.15 rolls off gently above ~1kHz at 8kHz sample rate.          */
+//#define LP_COEFF  0.15f
+//
+//static inline float lp_tick(float *state, float x)
+//{
+//    *state += LP_COEFF * (x - *state);
+//    return *state;
+//}
+//
+///* 1-bit rectangular dither — breaks up quantisation patterns.
+// * Alternates +1/-1 each sample; crude but effective and free.      */
+//static inline float dither(uint32_t *n)
+//{
+//    *n += 1;
+//    return (*n & 1) ? 1.0f : -1.0f;
+//}
 
 /* --------------------------------------------------------------------------
  * Pipeline_Init
@@ -97,8 +97,8 @@ void Pipeline_Init(AudioPipeline_t *p)
     Envelope_Init(&p->envelope);
     Echo_Init(&p->echo, 500);
     p->active_preset = 0;
-    p->lp_state      = 0.0f;
-    p->dither_n      = 0;
+//    p->lp_state      = 0.0f;
+//    p->dither_n      = 0;
 }
 
 /* --------------------------------------------------------------------------
@@ -181,13 +181,13 @@ pipeline_done:
      *   lp_tick   : one-pole IIR, darkens the top end sample-by-sample
      *   dither    : 1-bit rectangular, breaks up PWM quantisation steps
      * --------------------------------------------------------------------- */
-    if (preset_idx == 1) {
-        float norm = signal / 32768.0f;
-        norm   = softclip(norm);
-        norm   = lp_tick(&p->lp_state, norm);
-        norm  += dither(&p->dither_n) / 32768.0f;
-        signal = norm * 32768.0f;
-    }
+//    if (preset_idx == 2) {
+//        float norm = signal / 32768.0f;
+//        norm   = softclip(norm);
+//        norm   = lp_tick(&p->lp_state, norm);
+//        norm  += dither(&p->dither_n) / 32768.0f;
+//        signal = norm * 32768.0f;
+//    }
 
     return signal;
 }

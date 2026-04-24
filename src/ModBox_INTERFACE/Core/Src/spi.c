@@ -47,6 +47,8 @@ void HAL_SPI_MspInit(SPI_HandleTypeDef* spiHandle)
     __HAL_RCC_SPI2_CLK_ENABLE();
     __HAL_RCC_GPIOB_CLK_ENABLE();
 
+    HAL_NVIC_SetPriority(SPI2_IRQn, 0, 0);
+
     /**SPI2 GPIO Configuration
     PB13     ------> SPI2_SCK
     PB15     ------> SPI2_MOSI

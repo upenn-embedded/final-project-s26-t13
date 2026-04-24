@@ -67,7 +67,7 @@ void Error_Handler(void);
 #define feedback_GPIO_Port GPIOA
 #define resolution_Pin GPIO_PIN_7
 #define resolution_GPIO_Port GPIOA
-#define preset_5_pin GPIO_PIN_9
+#define preset_5_Pin GPIO_PIN_9
 #define preset_5_GPIO_Port GPIOC
 #define preset_1_Pin GPIO_PIN_9
 #define preset_1_GPIO_Port GPIOA
