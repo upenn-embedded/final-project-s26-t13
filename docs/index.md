@@ -64,7 +64,7 @@ Caption
 
 #### **Comments:**
 
-We originally chose STMs as our MCU for their I2S capabilities, but we really struggled with the implementation and eventually had to give up for the sake of our MVP Demo. Despite the switch up, we were able to successfully implement UART communication instead of I2S on top of learning how to use a completely new MCU. 
+We originally chose STMs as our MCU for their I2S capabilities, but we really struggled with the implementation and eventually had to give up for the sake of our MVP Demo. Despite the switch up, we were able to successfully implement UART communication instead of I2S on top of learning how to use a completely new MCU.
 
 ---
 
@@ -72,7 +72,7 @@ We originally chose STMs as our MCU for their I2S capabilities, but we really st
 
 #### **Features:**
 
-* RS 01: STM32 Nucleo - We worked with two STM32 Nucleos, one for handling user input and one for routing and generating the sound signal based on the user's actions.
+* HRS 01: STM32 Nucleo - We worked with two STM32 Nucleos, one for handling user input and one for routing and generating the sound signal based on the user's actions.
 * HRS 02: Digital User Interface - 5 push buttons representing an input type switch option and 4 presets and 5 potentiometers representing __. 1 potentiometer is the analog control for the VCO.
   ![schem0](./images/schematics/UI_Schematic.png)
 * HRS 04: Voltage Controlled Oscillator (VCO) - the voltage controlled oscillator is an analog oscillator that outputs either a triangle waveform or a square waveform determined by V_expo (ADC output, between 0 and 3.3V). It is built with Detkin resistors, capacitors, LM358 Op Amps, and BC548 BJTs.
@@ -81,9 +81,7 @@ We originally chose STMs as our MCU for their I2S capabilities, but we really st
 * HRS 06: Output Stage - We use a TPA2012 Amplifier to drive our output signal through the speaker. Our output speaker (TBD) is an 8Ohm Speaker so it requires a very low output impedance from the amplifier to achieve maximum output. We used the control switches on the amplifier to give our signal a gain of 6dB so we could hear it clearly. We use 3.3V to power the amplifier and ground the SDL pin to turn off the left output.
   ![schem3](./images/schematics/Output_Schematic.png)
 * HRS 07: Voltage Regulator (LDO) - We use a LDO to step down our 9V to ~3.3V so that it is safe to be imputed into our MCU.
-  ![LDO](.images/schematics/LDO_Schematic.png)
-* HRS 07: PMOS Buck Converter - We have a buck converter to step down our 9V to ~3.3V so that it is safe to be imputed into our MCU. Because our gate signal is 3.3Vpp and our output is roughly 3.3V, we opted to use a PMOS buck converter design and made a gate level shifter on top of that.
-  ![schem4](./images/schematics/Buck_Schematic.png)
+  ![LDO](./images/schematics/LDO_Schematic.png)
 
 ## **Validation:**
 
