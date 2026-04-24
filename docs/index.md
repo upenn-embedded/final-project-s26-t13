@@ -10,7 +10,7 @@
   </iframe>
 </div>
 
-In this demo, we will give an overview of the design process and a demostration of ModBox's user interface.
+**Demo:** We give an overview of the design process and a demostration of ModBox's user interface.
 
 ---
 
@@ -19,12 +19,15 @@ In this demo, we will give an overview of the design process and a demostration 
 <p align="center">
   <img src="./images/WebsiteImageFilter.png" alt="WebsiteImageFilter" style="max-width: 400px; width: 100%; height: auto;">
 </p>
+Filter Modules
 
 <p align="center">
   <img src="./images/WebsiteSpeakerAmp.png" alt="SpeakerAmp" style="max-width: 400px; width: 100%; height: auto;">
 </p>
+Amplifier Module
 
 ![CAD](./images/CAD.png)
+CAD Model of ModBox Casing
 
 #### **400x400 Image:**
 
@@ -234,7 +237,6 @@ Functionality:
 * Hardware: Input, Output, VCO Module
 * Firmware: Learn registers, file structure w/ pseudocode
 
-
 **MVP Demo**
 
 1. Hardware Implementation & System Diagram
@@ -242,29 +244,23 @@ Functionality:
    We’ve made one significant update to our original design: we are now using STM32s as our MCU Core instead of the ATmega328P to better handle the processing requirements. Currently, our Power and Physical UI systems are fully operational. While the Audio Input is still in development, we’ve established that the microphone signal will require dedicated hardware amplification and filtering to ensure high signal quality for the synthesizer.
 
    IMAGE
-
 2. Firmware Implementation & Drivers
    For the firmware, we are developing application logic on the STM32 to handle the high-speed conversion and routing of signals. We’ve written critical drivers for the ADC to read our physical UI knobs and the GPIO for our five module toggle buttons. The core logic currently manages the switching between hardware modules and the basic operation of the VCO and VCA, which are already functional. Implementation of Envelope Follower, Echo and Discretizer is done completely digitally.
-
 3. Device Demonstration
    In this demo, you can see the core functionality of our VCO and VCA. We can manipulate the tone using the physical potentiometers on our UI. Even though the microphone input isn't finalized, the internal signal routing through the Module Rack is working, allowing us to demonstrate the basic analog audio path through to the speaker.
-
 4. Software Requirements Specification (SRS)
    We have achieved our SRS goals regarding real-time user input. Data collected from our potentiometer ADC tests shows stable parameter control with minimal latency, ensuring that the 'ModBox' feels like a responsive instrument. Our next software milestone is finishing the microphone input.
-
 5. Hardware Requirements Specification (HRS)
    On the hardware side, we’ve met most of our requirements for the Output Amplifier and Power Regulation. We verified the output buffer’s ability to stabilize the signal for the speaker. We are using a boost converter in our final output stage, the VCA.
-
 6. Remaining Elements (Mechanical & UI)
    Our final vision includes a custom mechanical casework that mimics a classic modular synth aesthetic. We will feature 'patch cable' wiring for visual effect and a structured interface for the module toggle buttons and adjuster knobs. Something similar to what we have below, though the UI will probably look a bit different.
 
    IMAGE
-
 7. Risks & De-risking Plan
    Each time we add something we deal with amplification and noise issues. Adding one more element can break the rest of the circuits and code.
    One of the riskiest parts remaining is the Microphone Input. Because the raw electret signal is so weak and noisy, it could easily ruin the modular processing. To de-risk this, we are prioritizing the hardware filter/amplifier circuit this week to ensure we have a clean signal before Demo Day next week.
-
 8. Topics
+
 * Power managements(DONE)
 * Noise filtering(DONE)
 * Timers(DONE)
