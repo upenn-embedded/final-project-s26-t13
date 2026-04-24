@@ -1,4 +1,4 @@
-# Video Demo
+# ModBox - Video Demo
 
 <div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden;">
   <iframe
@@ -88,7 +88,6 @@ We originally chose STMs as our MCU for their I2S capabilities, but we really st
 ![LDO_valid](./images/validation/LDO_Validation.jpeg)
 
 **LDO Validation:** The input voltage (9V) is on the yellow power supply, the shifted output signal (3.3V) is on the multimeter.
-
 
 <div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden;">
   <iframe
