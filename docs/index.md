@@ -100,7 +100,7 @@ We originally chose STMs as our MCU for their I2S capabilities, but we really st
   </iframe>
 </div>
 
-**Speaker Amplifier Validation:** This video demonstrates the speaker producing sound and it's gain being varied by the switches on the speaker amplifier.
+**Speaker Amplifier Validation:** This video demonstrates the speaker producing sound and its gain being varied by the switches on the speaker amplifier.
 
 #### **Comments:**
 
