@@ -54,7 +54,7 @@ In this demo, we will give an overview of the design process and a demostration 
   </iframe>
 </div>
 
-Caption
+**UART Validation:** In this demo you can see our two MCUs communicating via UART. One MCU is tracking input ADC values and button interrupts and send all updates to the second MCU which implements those changes.
 
 **ADC Demo**
 
