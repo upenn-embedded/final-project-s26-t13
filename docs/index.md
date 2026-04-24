@@ -43,7 +43,7 @@ CAD Model of ModBox Casing
 * SRS 04: PWM Output - We generate a PWM output using a timer to generate one of our input signals.
 * SRS 05: Signal routing - Module routing requires a specific sequence of events: the oscillator produces the periodic waveform, the different modules (digital and analog) shape the tone of sound, and the analog amplifier is the final stage before the speaker. Because of this, we route our input signal through the STM32 so that it can apply / route to modules.
 * SRS 06: Envelope Generator - The envelope generator is one of our digital modules. We digitally envelope our signal to change our sound signal over time.
-* SRS 07: LCD screen - we use I2C to control an LCD screen that display's the user's selected sound modes.
+* SRS 07: LCD screen - we use SPI to control an LCD screen that display's the user's selected sound modes.
 
 #### **Validation:**
 
