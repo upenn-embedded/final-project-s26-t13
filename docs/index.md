@@ -70,7 +70,7 @@ We originally chose STMs as our MCU for their I2S capabilities, but we really st
 #### **Features:**
 
 * HRS 01: STM32 Nucleo - We worked with two STM32 Nucleos, one for handling user input and one for routing and generating the sound signal based on the user's actions.
-* HRS 02: Digital User Interface - 5 push buttons representing an input type switch option and 4 presets and 5 potentiometers representing __. 1 potentiometer is the analog control for the VCO.
+* HRS 02: Digital User Interface - 5 push buttons representing an input type switch option and 4 presets and 5 potentiometers controlling the envelope and the VCO.
   ![schem0](./images/schematics/UI_Schematic.png)
 * HRS 04: Voltage Controlled Oscillator (VCO) - the voltage controlled oscillator is an analog oscillator that outputs either a triangle waveform or a square waveform determined by V_expo (ADC output, between 0 and 3.3V). It is built with Detkin resistors, capacitors, LM358 Op Amps, and BC548 BJTs.
   ![schem1](./images/schematics/VCO_Schematic.png)
