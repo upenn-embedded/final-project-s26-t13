@@ -3,11 +3,13 @@
 void Envelope_Init(ADSR_t* adsr) {
     adsr->state = IDLE;
     adsr->current_amplitude = 0.0f;
-    // Default "Snappy" Settings
-    adsr->attack_rate = 0.001f;
-    adsr->decay_rate = 0.0005f;
-    adsr->sustain_level = 0.7f;
-    adsr->release_rate = 0.0002f;
+    /* Percussive defaults at 8 kHz: attack ~12 ms, decay ~25 ms.
+     * sustain_level near zero means decay IS the note duration — drum machine
+     * behaviour. Pots control attack_rate and decay_rate via ApplyParams(). */
+    adsr->attack_rate    = 0.010f;
+    adsr->decay_rate     = 0.004f;
+    adsr->sustain_level  = 0.05f;
+    adsr->release_rate   = 0.010f;
 }
 
 void Envelope_Trigger(ADSR_t* adsr) {

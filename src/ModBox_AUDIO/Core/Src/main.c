@@ -30,11 +30,11 @@
  * Synth parameter packet (7 bytes over UART)
  * -------------------------------------------------------------------------- */
 typedef struct {
-    uint8_t preset_id;    /* byte 1: 0-3 selects module chain */
-    uint8_t attack;       /* byte 2: 0-255 → envelope attack rate */
-    uint8_t release;      /* byte 3: 0-255 → envelope release rate */
-    uint8_t time;         /* byte 4: 0-255 → echo delay time */
-    uint8_t feedback;     /* byte 5: 0-255 → echo feedback */
+    uint8_t preset_id;    /* byte 0: 0-4 selects module chain */
+    uint8_t attack;       /* byte 1: 0-255 → envelope attack rate */
+    uint8_t decay;        /* byte 2: 0-255 → envelope decay rate (note body length) */
+    uint8_t time;         /* byte 3: 0-255 → echo delay time */
+    uint8_t filter;       /* byte 4: 0-255 → LP filter cutoff (modular sweep) */
 } SynthParams_t;
 
 /* --------------------------------------------------------------------------
@@ -51,6 +51,43 @@ volatile uint32_t ic_last_capture = 0;
 volatile bool     ic_valid        = false;
 volatile bool     ic_updated      = false;
 volatile bool     ic_first        = true;
+
+/* --------------------------------------------------------------------------
+ * EMA (Exponential Moving Average) filter for ic_period.
+ *
+ * Smooths out noisy potentiometer / input-capture readings so pitch
+ * changes are gradual instead of jumping on every glitchy capture.
+ *
+ * Alpha controls the smoothing speed:
+ *   lower  = smoother but slower to track real pot movement  (e.g. 0.05)
+ *   higher = faster tracking but lets more noise through     (e.g. 0.3)
+ *
+ * Start at 0.1 — a good middle ground for a hand-turned pot.
+ * Tune by ear: if pitch still jumps, lower it; if it lags too much, raise it.
+ * -------------------------------------------------------------------------- */
+#define IC_EMA_ALPHA  0.1f
+static float ic_period_ema = 0.0f;   /* filtered period, in timer ticks */
+
+/* --------------------------------------------------------------------------
+ * Schmitt trigger for the ADC-derived gate signal.
+ *
+ * A plain threshold (adc_raw > 2048) causes the gate to flicker on/off
+ * as the audio waveform oscillates, re-triggering the envelope on every
+ * cycle and producing a robotic stutter.
+ *
+ * A Schmitt trigger uses two thresholds with a dead-zone between them:
+ *   - Gate opens  only when the signal rises ABOVE GATE_THRESH_HIGH
+ *   - Gate closes only when the signal falls BELOW GATE_THRESH_LOW
+ *
+ * Thresholds are set close to midpoint (2048) so a modest input signal
+ * can open the gate.  Widen the gap if you get re-triggering; narrow it
+ * if the gate won't open on your signal level.
+ *
+ * ADC range is 0–4095; midpoint is 2048.
+ * -------------------------------------------------------------------------- */
+#define GATE_THRESH_HIGH  2200u   /* just above midpoint — opens on modest signal */
+#define GATE_THRESH_LOW   1900u   /* just below midpoint — reasonable dead-zone   */
+static bool gate_state = false;
 
 /* Last ADC reading — updated every ic_updated tick, read by debug print */
 static uint32_t  last_adc_raw   = 0;
@@ -69,9 +106,6 @@ int main(void)
 {
     HAL_Init();
     SystemClock_Config();
-	SynthDisplay_Init();
-	lcd_init();
-	LCD_setScreen(RED);
 
     MX_GPIO_Init();
     MX_DMA_Init();
@@ -121,8 +155,19 @@ int main(void)
         {
             ic_updated = false;
 
-            /* Compute the new PWM period from the captured IC frequency */
-            uint32_t dynamic_period = (uint32_t)(8.4f * (float)ic_period) - 1;
+            /* ----------------------------------------------------------
+             * Apply EMA filter to ic_period before computing pitch.
+             *
+             * On the very first valid capture, seed the filter with the
+             * raw value so there's no ramp-up from zero on startup.
+             * -------------------------------------------------------- */
+            if (ic_period_ema == 0.0f)
+                ic_period_ema = (float)ic_period;   /* seed on first capture */
+            else
+                ic_period_ema += IC_EMA_ALPHA * ((float)ic_period - ic_period_ema);
+
+            /* Compute the new PWM period from the filtered IC frequency */
+            uint32_t dynamic_period = (uint32_t)(8.4f * ic_period_ema) - 1;
 
             /* Clamp to 200 Hz – 5 kHz */
             if (dynamic_period > 41999) dynamic_period = 41999;
@@ -137,11 +182,23 @@ int main(void)
             HAL_ADC_PollForConversion(&hadc1, 1);
             uint32_t adc_raw      = HAL_ADC_GetValue(&hadc1);
             last_adc_raw          = adc_raw;   /* expose to debug print */
-            float    input_sample = (float)((int32_t)adc_raw - 2048) * 16.0f;
+            float    input_sample = (float)((int32_t)adc_raw - 2048) * 32.0f;
 
-            /* Gate: treat upper half of ADC range as "gate open".
-             * Replace with your actual gate GPIO read if available. */
-            bool hardware_gate = (adc_raw > 2048);
+            /* ----------------------------------------------------------
+             * Schmitt trigger gate — latches open/closed with hysteresis
+             * so normal waveform oscillation doesn't re-trigger the envelope.
+             *
+             * Only update gate_state when the signal crosses a threshold;
+             * inside the dead-zone (GATE_THRESH_LOW..GATE_THRESH_HIGH)
+             * the previous state is held, ignoring waveform swing.
+             * -------------------------------------------------------- */
+            if (adc_raw > GATE_THRESH_HIGH)
+                gate_state = true;
+            else if (adc_raw < GATE_THRESH_LOW)
+                gate_state = false;
+            /* else: inside dead-zone — keep gate_state unchanged */
+
+            bool hardware_gate = gate_state;
 
             /* -----------------------------------------------------------
              * Run the sample through the active preset module chain.
@@ -149,6 +206,15 @@ int main(void)
              * whenever a new UART packet arrives.
              * --------------------------------------------------------- */
             float processed = Pipeline_Process(&pipeline, input_sample, hardware_gate);
+
+            /* -----------------------------------------------------------
+             * Makeup gain — compensates for level reduction introduced by
+             * the wavetable exponential curve (t² attenuates mid-level
+             * signals significantly).  2.0 restores roughly unity gain
+             * on average; raise toward 3.0 if still too quiet, lower
+             * toward 1.5 if clipping occurs.
+             * --------------------------------------------------------- */
+            processed *= 4.0f;
 
             /* -----------------------------------------------------------
              * Map processed float back to a PWM compare value.
@@ -186,19 +252,19 @@ int main(void)
             new_data_flag = false;
 
             /* Cache locally for atomic read */
-            synth.preset_id  = rx_buffer[0];
-            synth.attack     = rx_buffer[1];
-            synth.release    = rx_buffer[2];
-            synth.time       = rx_buffer[3];
-            synth.feedback   = rx_buffer[4];
+            synth.preset_id = rx_buffer[0];
+            synth.attack    = rx_buffer[1];
+            synth.decay     = rx_buffer[2];
+            synth.time      = rx_buffer[3];
+            synth.filter    = rx_buffer[4];
 
             /* Apply all parameters to the pipeline in one call */
             Pipeline_ApplyParams(&pipeline,
                                  synth.preset_id,
                                  synth.attack,
-                                 synth.release,
+                                 synth.decay,
                                  synth.time,
-                                 synth.feedback);
+                                 synth.filter);
 
             /* Debug: print preset name and all raw parameter values */
             static const char *preset_names[] = {
@@ -253,7 +319,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
         /* NOTE: Pipeline_ApplyParams() is NOT called here — it runs from
          * the main loop once new_data_flag is checked.  This keeps the ISR
          * short and avoids calling floating-point math from interrupt context. */
-        // HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_7);
+        HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_7);
         new_data_flag = true;
 
         /* Restart DMA for the next packet */

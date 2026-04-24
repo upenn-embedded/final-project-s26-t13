@@ -22,52 +22,46 @@ void SynthDisplay_Init(void) {
  * @param adc_val: 0-4095 raw ADC (for freq pos)
  * @param gain: 0.0-1.0 current envelope amplitude (for color)
  */
-void SynthDisplay_Update(uint8_t p_id, uint8_t att, uint8_t rel, uint8_t time, uint8_t fdbk) {
+void SynthDisplay_Update(uint8_t p_id, uint8_t att, uint8_t dec, uint8_t time, uint8_t flt) {
     char str[32];
 
-    // 2. PRESET HEADER (Only redraw on change to prevent flicker)
     if (p_id != last_preset) {
-        LCD_drawBlock(0, 0, 160, 18, 0x18E3); // Dark Blue Header
-
-//        // Match your pname logic - here we just use the ID
+        LCD_drawBlock(0, 0, 160, 18, 0x18E3);
         sprintf(str, "PRESET: %d", p_id);
         LCD_drawString(5, 5, str, 0xFFFF, 0x18E3);
 
-        // Draw static labels once
+        /* Static labels — drawn once per preset change */
         LCD_drawString(5, 22, "ATK:", 0xFFFF, 0x0000);
-        LCD_drawString(5, 32, "REL:", 0xFFFF, 0x0000);
+        LCD_drawString(5, 32, "DEC:", 0xFFFF, 0x0000);
         LCD_drawString(5, 42, "TIME:", 0xFFFF, 0x0000);
-        LCD_drawString(5, 52, "FDB:", 0xFFFF, 0x0000);
+        LCD_drawString(5, 52, "FLT:", 0xFFFF, 0x0000);
 
         last_preset = p_id;
     }
 
-    // 3. UPDATE LIVE TEXT VALUES
-    // We print these in a different color so they "pop"
+    /* Live values — each value at the same y as its label */
     sprintf(str, "%3d", att);
-    LCD_drawString(35, 32, str, 0x07E0, 0x0000); // Green for Atk
+    LCD_drawString(35, 22, str, 0x07E0, 0x0000);   /* green  — ATK */
 
-    sprintf(str, "%3d", rel);
-    LCD_drawString(35, 42, str, 0x07FF, 0x0000); // Cyan for Rel
+    sprintf(str, "%3d", dec);
+    LCD_drawString(35, 32, str, 0x07FF, 0x0000);   /* cyan   — DEC */
 
     sprintf(str, "%3d", time);
-    LCD_drawString(35, 52, str, 0xFBE0, 0x0000); // Orange for time
+    LCD_drawString(35, 42, str, 0xFBE0, 0x0000);   /* orange — TIME */
 
-    sprintf(str, "%3d", fdbk);
-    LCD_drawString(35, 22, str, 0xF81F, 0x0000); // Pink for fdbk
+    sprintf(str, "%3d", flt);
+    LCD_drawString(35, 52, str, 0xF81F, 0x0000);   /* pink   — FLT */
 
-    // 4. PARAMETER BARS (Visual representation)
-    // Moving them slightly to the right so they don't overlap the text
-    LCD_drawBlock(65, 34, 65 + (att/3), 36, 0x07E0);
-    LCD_drawBlock(65 + (att/3), 34, 155, 36, 0x0000);
+    /* Parameter bars */
+    LCD_drawBlock(65, 24, 65 + (att/3),  26, 0x07E0);
+    LCD_drawBlock(65 + (att/3),  24, 155, 26, 0x0000);
 
-    LCD_drawBlock(65, 44, 65 + (rel/3), 46, 0x07FF);
-    LCD_drawBlock(65 + (rel/3), 44, 155, 46, 0x0000);
+    LCD_drawBlock(65, 34, 65 + (dec/3),  36, 0x07FF);
+    LCD_drawBlock(65 + (dec/3),  34, 155, 36, 0x0000);
 
-    LCD_drawBlock(65, 54, 65 + (time/3), 56, 0xFBE0);
-	LCD_drawBlock(65 + (rel/3), 54, 155, 56, 0x0000);
+    LCD_drawBlock(65, 44, 65 + (time/3), 46, 0xFBE0);
+    LCD_drawBlock(65 + (time/3), 44, 155, 46, 0x0000);
 
-	LCD_drawBlock(65, 64, 65 + (fdbk/3), 66, 0xF81F);
-	LCD_drawBlock(65 + (rel/3), 64, 155, 66, 0x0000);
-
+    LCD_drawBlock(65, 54, 65 + (flt/3),  56, 0xF81F);
+    LCD_drawBlock(65 + (flt/3),  54, 155, 56, 0x0000);
 }

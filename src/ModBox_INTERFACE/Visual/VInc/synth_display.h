@@ -11,9 +11,9 @@ void SynthDisplay_Init(void);
 void SynthDisplay_Update(
 		uint8_t p_id,
 		uint8_t att,
-		uint8_t rel,
+		uint8_t dec,
 		uint8_t time,
-		uint8_t fdbk
+		uint8_t flt
 	);
 
 #endif

@@ -76,68 +76,66 @@ void Interface_Update(void) {
     GPIO_PinState curr_pc9 = HAL_GPIO_ReadPin(GPIOC, preset_5_Pin);
 
 
-    // PRESET 1
+    // PRESET 1 → sends ID 0 to audio MCU
     if (curr_p9 == GPIO_PIN_SET && last_p9 == GPIO_PIN_RESET) {
-        iface_state.preset_id = 1;
+        iface_state.preset_id = 0;
         iface_state.dirty_flag = 1;
         Debug_Log("BUTTON: Preset 1 Active");
     }
     last_p9 = curr_p9;
 
-    // PRESET 2
+    // PRESET 2 → sends ID 1 to audio MCU
     if (curr_p10 == GPIO_PIN_SET && last_p10 == GPIO_PIN_RESET) {
-        iface_state.preset_id = 2;
+        iface_state.preset_id = 1;
         iface_state.dirty_flag = 1;
         Debug_Log("BUTTON: Preset 2 Active");
     }
     last_p10 = curr_p10;
 
-    // PRESET 3
+    // PRESET 3 → sends ID 2 to audio MCU
     if (curr_p11 == GPIO_PIN_SET && last_p11 == GPIO_PIN_RESET) {
-        iface_state.preset_id = 3;
+        iface_state.preset_id = 2;
         iface_state.dirty_flag = 1;
         Debug_Log("BUTTON: Preset 3 Active");
     }
     last_p11 = curr_p11;
 
-    // PRESET 4
+    // PRESET 4 → sends ID 3 to audio MCU
     if (curr_p12 == GPIO_PIN_SET && last_p12 == GPIO_PIN_RESET) {
-        iface_state.preset_id = 4;
+        iface_state.preset_id = 3;
         iface_state.dirty_flag = 1;
         Debug_Log("BUTTON: Preset 4 Active");
     }
     last_p12 = curr_p12;
 
-    // PRESET 5
+    // PRESET 5 → pipeline preset 4 (Envelope First)
     if (curr_pc9 == GPIO_PIN_SET && last_pc9 == GPIO_PIN_RESET) {
-		iface_state.preset_id = 5;
-		iface_state.dirty_flag = 1;
-		Debug_Log("BUTTON: Preset 5 Active");
-	}
-	last_pc9 = curr_pc9;
+        iface_state.preset_id = 4;
+        iface_state.dirty_flag = 1;
+        Debug_Log("BUTTON: Preset 5 Active");
+    }
+    last_pc9 = curr_pc9;
 
-//        iface_state.dirty_flag = 0;
     if (iface_state.dirty_flag) {
         uint8_t uart_packet[5];
         uart_packet[0] = iface_state.preset_id;
         for(int i = 0; i < 4; i++) {
-            uart_packet[i+1] = (uint8_t)(knob_raw[i] >> 3);
+            uart_packet[i+1] = (uint8_t)(knob_raw[i] >> 4);  /* 12-bit → 8-bit: was >>3 (0-511, wraps!) */
         }
 
-        // Send via UART1 (assuming you enabled it in CubeMX)
-        HAL_UART_Transmit(&huart1, uart_packet, 5, 10);
+        /* Send once — the audio MCU's DMA expects exactly 5 bytes.
+         * Sending twice was causing every other packet to be misaligned. */
         if (HAL_UART_Transmit(&huart1, uart_packet, 5, 10) == HAL_OK) {
-        	HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_7);
+            HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_7);
             Debug_Log("UART Sent");
-
         }
 
   	    SynthDisplay_Update(
   	      iface_state.preset_id,
-		  iface_state.knobs[0],
-		  iface_state.knobs[1],
-		  iface_state.knobs[2],
-		  iface_state.knobs[3]
+		  (uint8_t)(knob_raw[0] >> 4),
+		  (uint8_t)(knob_raw[1] >> 4),
+		  (uint8_t)(knob_raw[2] >> 4),
+		  (uint8_t)(knob_raw[3] >> 4)
 		);
 
         iface_state.dirty_flag = 0;
