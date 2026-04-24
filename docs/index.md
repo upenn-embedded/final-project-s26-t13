@@ -36,10 +36,11 @@ In this demo, we will give an overview of the design process and a demostration 
 
 * SRS 01: ADC Input - we use the ADC input pins to track the potentiometer-based voltage divider output (the user’s control knobs).
 * SRS 02: Interrupts - we use interrupts to track the user’s button presses when they want to switch modes or routing.
-* SRS 03: UART Communication between STM32s -The two MCUs communicate with each other via UART. One MCU processes and tracks the user input and modes of operation and sends them to the second MCU via UART
-* SRS 04: PWM Output - We generate a PWM output using a timer with frequency of equation.
-* SRS 06: Signal routing - Module routing requires a specific sequence of events: the oscillator produces the periodic waveform, the different modules (digital and analog) shape the tone of sound, and the analog amplifier is the final stage before the speaker. Because of this, we route our input signal through the STM32 __ pin so that it can apply / route to modules.
-* SRS 05: Envelope Generator - The envelope generator is one of our digital modules. We digitally envelope our signal
+* SRS 03: UART Communication between MCUs - The two STM32 nucleos communicate with each other via UART. One MCU processes and tracks the user input and modes of operation and sends them to the second MCU via UART
+* SRS 04: PWM Output - We generate a PWM output using a timer with frequency of ___ equation ____ to power our buck converter.
+* SRS 05: Signal routing - Module routing requires a specific sequence of events: the oscillator produces the periodic waveform, the different modules (digital and analog) shape the tone of sound, and the analog amplifier is the final stage before the speaker. Because of this, we route our input signal through the STM32 __ pin(s) so that it can apply / route to modules.
+* SRS 06: Envelope Generator - The envelope generator is one of our digital modules. We digitally envelope our signal
+* SRS 07: LCD screen - we use I2C to control an LCD screen that display's the user's selected sound modes.
 
 #### **Validation:**
 
@@ -57,14 +58,11 @@ In this demo, we will give an overview of the design process and a demostration 
 
 Caption
 
-
-
 **ADC Demo**
 
 Video
 
 Caption
-
 
 #### **Comments:**
 
@@ -76,16 +74,13 @@ We originally chose STMs as our MCU for their I2S capabilities, but we really st
 
 #### **Features:**
 
-* HRS 01: Speaker choice.
-* HRS 02: 5 push buttons representing an input type switch option and 4 presets.
-* HRS 03: 5 potentiometers representing __. 1 potentiometer is the analog control for the VCO.
-
+* RS 01: STM32 Nucleo - We worked with two STM32 Nucleos, one for handling user input and one for routing and generating the sound signal based on the user's actions.
+* HRS 02: Digital User Interface - 5 push buttons representing an input type switch option and 4 presets and 5 potentiometers representing __. 1 potentiometer is the analog control for the VCO.
   ![schem0](./images/schematics/UI_Schematic.png)
-* HRS 04: Voltage Controlled Oscillator (VCO) - the voltage controlled oscillator is an analog oscillator that outputs either a triangle waveform or a square waveform determined by V_expo (ADC output, between 0 and 3.3V). It is built with Detkin resistors, capacitors, LM358 Op Amps, and BC548 BJTs. The schematic for the VCO below:
+* HRS 04: Voltage Controlled Oscillator (VCO) - the voltage controlled oscillator is an analog oscillator that outputs either a triangle waveform or a square waveform determined by V_expo (ADC output, between 0 and 3.3V). It is built with Detkin resistors, capacitors, LM358 Op Amps, and BC548 BJTs. 
   ![schem1](./images/schematics/VCO_Schematic.png)
-* HRS 05: Voltage Controlled Filter (VCF) - One of our modules is a Voltage controlled low pass filter. By turning the potentiometer knobs, the user can adjust the gain and cutoff frequency of the amplifier. The schematic is below:
-  ![schem2](./images/schematics/VCF_Schematic.png)
-* HRS 06: Output Stage - We use a TPA2012 Amplifier to drive our output signal through the speaker. Our output speaker (TBD) is an 8Ohm Speaker so it requires a very low output impedance from the amplifier to achieve maximum output. Furthermore, we used the control switches on the amplifier to give our signal a gain of 6dB so we could hear it clearly. We use 3.3V to power the amplifier and ground the SDL pin to turn off the left output. The schematic for the output stage is below:
+* HRS 05: Voltage Controlled Filter (VCF) - One of our modules is a Voltage controlled low pass filter. By turning the potentiometer knobs, the user can adjust the gain and cutoff frequency of the amplifier.![schem2](./images/schematics/VCF_Schematic.png)
+* HRS 06: Output Stage - We use a TPA2012 Amplifier to drive our output signal through the speaker. Our output speaker (TBD) is an 8Ohm Speaker so it requires a very low output impedance from the amplifier to achieve maximum output. We used the control switches on the amplifier to give our signal a gain of 6dB so we could hear it clearly. We use 3.3V to power the amplifier and ground the SDL pin to turn off the left output.
   ![schem3](./images/schematics/Output_Schematic.png)
 * HRS 07: PMOS Buck Converter - We have a buck converter to step down our 9V to ~3.3V so that it is safe to be imputed into our MCU. Because our gate signal is 3.3Vpp and our output is roughly 3.3V, we opted to use a PMOS buck converter design and made a gate level shifter on top of that.
   ![schem4](./images/schematics/Buck_Schematic.png)
@@ -98,14 +93,11 @@ We originally chose STMs as our MCU for their I2S capabilities, but we really st
 
 The input voltage (9V) is in blue, the level shifted gate signal is in green, and the output voltage (~3V) is in yellow.
 
-
-
 **Speaker Amplifier Validation**
 
 Video
 
 Caption
-
 
 #### **Comments:**
 
