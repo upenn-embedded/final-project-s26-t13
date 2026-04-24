@@ -46,10 +46,11 @@ CAD Model of ModBox Casing
 * SRS 01: ADC Input - we use the ADC input pins to track the potentiometer-based voltage divider output (the user’s control knobs).
 * SRS 02: Interrupts - we use interrupts to track the user’s button presses when they want to switch modes or routing.
 * SRS 03: UART Communication between MCUs - The two STM32 nucleos communicate with each other via UART. One MCU processes and tracks the user input and modes of operation and sends them to the second MCU via UART
-* SRS 04: PWM Output - We generate a PWM output using a timer to generate one of our input signals.
+* SRS 04: PWM Output - We generate a PWM output using a timer to generate one of match the VCO's output signal.
 * SRS 05: Signal routing - Module routing requires a specific sequence of events: the oscillator produces the periodic waveform, the different modules (digital and analog) shape the tone of sound, and the analog amplifier is the final stage before the speaker. Because of this, we route our input signal through the STM32 so that it can apply / route to modules.
-* SRS 06: Envelope Generator - The envelope generator is one of our digital modules. We digitally envelope our signal to change our sound signal over time.
+* SRS 06: Envelope Generator - The envelope generator is one of our digital modules. We digitally envelope our signal to change our sound signal over time based on knob input.
 * SRS 07: LCD screen - we use SPI to control an LCD screen that display's the user's selected sound modes.
+* SRS 08: Echo Module - we have a digital module that add an echo to our sound.
 
 #### **Validation:**
 
