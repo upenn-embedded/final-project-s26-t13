@@ -109,8 +109,10 @@ void MX_TIM3_Init(void)
         Error_Handler();
     }
 
-    // Capture on rising edge
-    sICConfig.ICPolarity  = TIM_ICPOLARITY_RISING;
+    /* Capture on both edges:
+     *   Rising  → measure full period (rise-to-rise) + open gate
+     *   Falling → close gate so envelope begins release */
+    sICConfig.ICPolarity  = TIM_ICPOLARITY_BOTHEDGE;
     sICConfig.ICSelection = TIM_ICSELECTION_DIRECTTI;
     sICConfig.ICPrescaler = TIM_ICPSC_DIV1;
     sICConfig.ICFilter    = 0x0F;  // some filtering for noisy signals

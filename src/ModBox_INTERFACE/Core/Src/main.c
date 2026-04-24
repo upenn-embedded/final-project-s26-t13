@@ -120,8 +120,7 @@ int main(void)
 
 //  HAL_UART_Transmit(&huart2, (uint8_t*)"System Ready. Press Buttons...\r\n", 32, 100);
 //  Interface_Init();
-  lcd_init();
-  SynthDisplay_Init();
+  SynthDisplay_Init();   /* lcd_init() + LCD_setScreen(BLACK) — don't call lcd_init() again here */
 
   HAL_ADC_Start_DMA(&hadc1, (uint32_t*)knob_raw, 5);
   /* USER CODE END 2 */

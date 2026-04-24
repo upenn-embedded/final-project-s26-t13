@@ -105,7 +105,7 @@ void Pipeline_Init(AudioPipeline_t *p)
     p->lp_state = 0.0f;
     p->lp_coeff = 0.7f;   /* moderately open on startup — pot sweeps from 0.02 to 0.99 */
     p->dither_n = 0;
-    Pipeline_SetPreset(p, 4);          /* Envelope First — most beat-like default */
+    Pipeline_SetPreset(p, 0);          /* Clean default — signal passes through until user picks a preset */
 }
 
 /* --------------------------------------------------------------------------

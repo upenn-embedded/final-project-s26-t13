@@ -68,26 +68,11 @@ volatile bool     ic_first        = true;
 #define IC_EMA_ALPHA  0.1f
 static float ic_period_ema = 0.0f;   /* filtered period, in timer ticks */
 
-/* --------------------------------------------------------------------------
- * Schmitt trigger for the ADC-derived gate signal.
- *
- * A plain threshold (adc_raw > 2048) causes the gate to flicker on/off
- * as the audio waveform oscillates, re-triggering the envelope on every
- * cycle and producing a robotic stutter.
- *
- * A Schmitt trigger uses two thresholds with a dead-zone between them:
- *   - Gate opens  only when the signal rises ABOVE GATE_THRESH_HIGH
- *   - Gate closes only when the signal falls BELOW GATE_THRESH_LOW
- *
- * Thresholds are set close to midpoint (2048) so a modest input signal
- * can open the gate.  Widen the gap if you get re-triggering; narrow it
- * if the gate won't open on your signal level.
- *
- * ADC range is 0–4095; midpoint is 2048.
- * -------------------------------------------------------------------------- */
-#define GATE_THRESH_HIGH  2200u   /* just above midpoint — opens on modest signal */
-#define GATE_THRESH_LOW   1900u   /* just below midpoint — reasonable dead-zone   */
-static bool gate_state = false;
+/* gate_state is set directly by the IC callback:
+ *   rising edge  → true  (envelope trigger)
+ *   falling edge → false (envelope release)
+ * No ADC Schmitt trigger needed — the oscillator edge IS the gate. */
+static volatile bool gate_state = false;
 
 /* Last ADC reading — updated every ic_updated tick, read by debug print */
 static uint32_t  last_adc_raw   = 0;
@@ -173,31 +158,13 @@ int main(void)
             if (dynamic_period > 41999) dynamic_period = 41999;
             if (dynamic_period < 1679)  dynamic_period = 1679;
 
-            /* -----------------------------------------------------------
-             * Read raw ADC sample and determine hardware gate state.
-             *
-             * ADC value (0-4095) is normalised to a signed 16-bit range
-             * so it is compatible with the pipeline's int16_t modules.
-             * --------------------------------------------------------- */
+            /* Read ADC for audio input sample */
             HAL_ADC_PollForConversion(&hadc1, 1);
             uint32_t adc_raw      = HAL_ADC_GetValue(&hadc1);
-            last_adc_raw          = adc_raw;   /* expose to debug print */
+            last_adc_raw          = adc_raw;
             float    input_sample = (float)((int32_t)adc_raw - 2048) * 32.0f;
 
-            /* ----------------------------------------------------------
-             * Schmitt trigger gate — latches open/closed with hysteresis
-             * so normal waveform oscillation doesn't re-trigger the envelope.
-             *
-             * Only update gate_state when the signal crosses a threshold;
-             * inside the dead-zone (GATE_THRESH_LOW..GATE_THRESH_HIGH)
-             * the previous state is held, ignoring waveform swing.
-             * -------------------------------------------------------- */
-            if (adc_raw > GATE_THRESH_HIGH)
-                gate_state = true;
-            else if (adc_raw < GATE_THRESH_LOW)
-                gate_state = false;
-            /* else: inside dead-zone — keep gate_state unchanged */
-
+            /* Gate comes directly from oscillator edges (set in IC callback) */
             bool hardware_gate = gate_state;
 
             /* -----------------------------------------------------------
@@ -294,21 +261,38 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
 {
     if (htim->Instance == TIM3 && htim->Channel == HAL_TIM_ACTIVE_CHANNEL_1)
     {
-        uint32_t current = HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_1);
+        uint32_t current  = HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_1);
+        bool     pin_high = (HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_6) == GPIO_PIN_SET);
 
-        if (!ic_first)
+        if (pin_high)
         {
-            if (current >= ic_last_capture)
-                ic_period = current - ic_last_capture;
-            else
-                ic_period = (0xFFFF - ic_last_capture) + current + 1;
+            /* Rising edge — open gate and measure full period (rise-to-rise). */
+            gate_state = true;
 
-            ic_valid   = true;
-            ic_updated = true;
+            if (!ic_first)
+            {
+                if (current >= ic_last_capture)
+                    ic_period = current - ic_last_capture;
+                else
+                    ic_period = (0xFFFF - ic_last_capture) + current + 1;
+
+                ic_valid   = true;
+                ic_updated = true;
+            }
+
+            ic_first        = false;
+            ic_last_capture = current;
         }
-
-        ic_first        = false;
-        ic_last_capture = current;
+        else
+        {
+            /* Falling edge — close gate so the envelope begins release.
+             * Period is not updated (still rising-to-rising).
+             * Set ic_updated so the main loop runs Pipeline_Process and
+             * the envelope release is applied without waiting a full period. */
+            gate_state = false;
+            if (ic_valid)
+                ic_updated = true;
+        }
     }
 }
 
