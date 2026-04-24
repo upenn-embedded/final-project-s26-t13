@@ -29,6 +29,10 @@ Amplifier Module
 ![CAD](./images/CAD.png)
 CAD Model of ModBox Casing
 
+![modbox1](./images/modbox1.jpg)
+
+![modbox3](./images/modbox3.jpg)
+
 #### **400x400 Image:**
 
 ---
