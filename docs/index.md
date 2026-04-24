@@ -85,7 +85,7 @@ We originally chose STMs as our MCU for their I2S capabilities, but we really st
 
 ## **Validation:**
 
-![LDO_valid](./images/validation/LDO_Validation.png)
+![LDO_valid](./images/validation/LDO_Validation.jpeg)
 
 **LDO Validation:** The input voltage (9V) is in blue, the level shifted gate signal is in green, and the output voltage (~3V) is in yellow.
 
