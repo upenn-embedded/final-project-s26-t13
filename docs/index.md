@@ -209,3 +209,64 @@ Functionality:
 8. Final Demo Goals
 
 * For our final demo of the project, we plan on showing the different modules that the synthesizer does and how it affects the output of sound. We also plan to do a live demo of inputting audio with someone’s voice and playing around with the synthesizer to create and shape cool new sounds. There shouldn’t be too many constraints here since it doesn’t actually attach to anyone, but we need to make sure the MCUs are supplied with power so the device operates, likely with batteries.
+
+9. Sprint Planning
+
+| Milestone  | Functionality Achieved                                                                                             | Distribution of Work |
+| ---------- | ------------------------------------------------------------------------------------------------------------------ | -------------------- |
+| Sprint #1  | build an input module for the voice input and for the control voltage input, successfully demo on the oscilloscope |                      |
+| Sprint #2  | have 2-3 successful modules (on top of input modules), demo on oscilloscope                                        |                      |
+| MVP Demo   | have all modules complete, demo with oscilloscope and speaker.                                                     |                      |
+| Final Demo | have a completed cad model of the design box, along with fully functioning device.                                 |                      |
+
+**Sprint Review #1**
+
+1. Last week's progress
+
+   So far, we have met with Andrea, our project manager, and figured out our situation in terms of parts. We found that despite needing a microphone and preamplifier, Detkin actually had the parts that we needed so we do not need to order anything a la carte for this project. We also decided to shift our microcontrollers to the STM32s instead of the ATMega328-PB, since the STM32 is much better suited for ADC applications and our project is largely using ADC. We also decided to shift our communication protocol between our microcontrollers from I2C to I2S, as per Andrea's guidance, since I2S is much better suited for high-quality audio.
+2. Current State of project
+
+   As of the beginning of our first lab period designated for the final project, we do not have any code or hardware written. Our plan is to create our CircuitLab schematic for all of the connections between our physical hardware and module creation. We will also confirm all of our parts. We plan to start on at least some portions of the hardware connections (input, output, 1 module (VCO)), and get a decent start on our firmware. At the very least, figure out a structure for our code, learn the STM registers better so we can code more efficiently, and get some files started with pseudocode for what they need to do. At the end of the lab section, we will include our schematic and indicate which portions we started for hardware.
+3. GOALS
+
+* Circuitlab schematic
+* Confirm all parts
+* Hardware: Input, Output, VCO Module
+* Firmware: Learn registers, file structure w/ pseudocode
+
+
+**MVP Demo**
+
+1. Hardware Implementation & System Diagram
+   Our hardware implementation centers around a modular rack where audio signals are processed through several custom modules: VCO, VCF, VCA, Echo, Discretizer, and an Envelope Generator.
+   We’ve made one significant update to our original design: we are now using STM32s as our MCU Core instead of the ATmega328P to better handle the processing requirements. Currently, our Power and Physical UI systems are fully operational. While the Audio Input is still in development, we’ve established that the microphone signal will require dedicated hardware amplification and filtering to ensure high signal quality for the synthesizer.
+
+   IMAGE
+
+2. Firmware Implementation & Drivers
+   For the firmware, we are developing application logic on the STM32 to handle the high-speed conversion and routing of signals. We’ve written critical drivers for the ADC to read our physical UI knobs and the GPIO for our five module toggle buttons. The core logic currently manages the switching between hardware modules and the basic operation of the VCO and VCA, which are already functional. Implementation of Envelope Follower, Echo and Discretizer is done completely digitally.
+
+3. Device Demonstration
+   In this demo, you can see the core functionality of our VCO and VCA. We can manipulate the tone using the physical potentiometers on our UI. Even though the microphone input isn't finalized, the internal signal routing through the Module Rack is working, allowing us to demonstrate the basic analog audio path through to the speaker.
+
+4. Software Requirements Specification (SRS)
+   We have achieved our SRS goals regarding real-time user input. Data collected from our potentiometer ADC tests shows stable parameter control with minimal latency, ensuring that the 'ModBox' feels like a responsive instrument. Our next software milestone is finishing the microphone input.
+
+5. Hardware Requirements Specification (HRS)
+   On the hardware side, we’ve met most of our requirements for the Output Amplifier and Power Regulation. We verified the output buffer’s ability to stabilize the signal for the speaker. We are using a boost converter in our final output stage, the VCA.
+
+6. Remaining Elements (Mechanical & UI)
+   Our final vision includes a custom mechanical casework that mimics a classic modular synth aesthetic. We will feature 'patch cable' wiring for visual effect and a structured interface for the module toggle buttons and adjuster knobs. Something similar to what we have below, though the UI will probably look a bit different.
+
+   IMAGE
+
+7. Risks & De-risking Plan
+   Each time we add something we deal with amplification and noise issues. Adding one more element can break the rest of the circuits and code.
+   One of the riskiest parts remaining is the Microphone Input. Because the raw electret signal is so weak and noisy, it could easily ruin the modular processing. To de-risk this, we are prioritizing the hardware filter/amplifier circuit this week to ensure we have a clean signal before Demo Day next week.
+
+8. Topics
+* Power managements(DONE)
+* Noise filtering(DONE)
+* Timers(DONE)
+* ADC(DONE)
+* UART(DONE)
