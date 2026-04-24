@@ -44,8 +44,6 @@ In this demo, we will give an overview of the design process and a demostration 
 
 #### **Validation:**
 
-**UART Demo**
-
 <div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden;">
   <iframe
     src="https://www.youtube.com/embed/eALjC2jrxNI"
@@ -87,11 +85,9 @@ We originally chose STMs as our MCU for their I2S capabilities, but we really st
 
 ## **Validation:**
 
-**PMOS Buck Validation**
-
 ![BuckScope](./images/validation/scope_60.png)
 
-The input voltage (9V) is in blue, the level shifted gate signal is in green, and the output voltage (~3V) is in yellow.
+**PMOS Buck Validation:** The input voltage (9V) is in blue, the level shifted gate signal is in green, and the output voltage (~3V) is in yellow.
 
 **Speaker Amplifier Validation**
 
