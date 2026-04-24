@@ -89,11 +89,18 @@ We originally chose STMs as our MCU for their I2S capabilities, but we really st
 
 **LDO Validation:** The input voltage (9V) is on the yellow power supply, the shifted output signal (3.3V) is on the multimeter.
 
-**Speaker Amplifier Validation**
 
-Video
+<div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden;">
+  <iframe
+    src="https://www.youtube.com/embed/JtyX_r8pcOk"
+    title="Demo video player"
+    style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"
+    frameborder="0"
+    allowfullscreen>
+  </iframe>
+</div>
 
-Caption
+**Speaker Amplifier Validation:** This video demonstrates the speaker producing sound and it's gain being varied by the switches on the speaker amplifier.
 
 #### **Comments:**
 
