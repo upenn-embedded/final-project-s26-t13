@@ -85,9 +85,9 @@ We originally chose STMs as our MCU for their I2S capabilities, but we really st
 
 ## **Validation:**
 
-![BuckScope](./images/validation/scope_60.png)
+![LDO_valid](./images/validation/LDO_Validation.png)
 
-**PMOS Buck Validation:** The input voltage (9V) is in blue, the level shifted gate signal is in green, and the output voltage (~3V) is in yellow.
+**LDO Validation:** The input voltage (9V) is in blue, the level shifted gate signal is in green, and the output voltage (~3V) is in yellow.
 
 **Speaker Amplifier Validation**
 
