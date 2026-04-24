@@ -80,7 +80,7 @@ We originally chose STMs as our MCU for their I2S capabilities, but we really st
 * HRS 05: Voltage Controlled Filter (VCF) - One of our modules is a Voltage controlled low pass filter. By turning the potentiometer knobs, the user can adjust the gain and cutoff frequency of the amplifier.![schem2](./images/schematics/VCF_Schematic.png)
 * HRS 06: Output Stage - We use a TPA2012 Amplifier to drive our output signal through the speaker. Our output speaker (TBD) is an 8Ohm Speaker so it requires a very low output impedance from the amplifier to achieve maximum output. We used the control switches on the amplifier to give our signal a gain of 6dB so we could hear it clearly. We use 3.3V to power the amplifier and ground the SDL pin to turn off the left output.
   ![schem3](./images/schematics/Output_Schematic.png)
-* HRS 07: Voltage Regulator (LDO) - We use a LDO to step down our 9V to ~3.3V so that it is safe to be imputed into our MCU.
+* HRS 07: Voltage Regulator (LDO) - We use a LM1086 LDO to step down our 9V to ~3.3V so that it is safe to be imputed into our MCU.
   ![LDO](./images/schematics/LDO_Schematic.png)
 
 ## **Validation:**
