@@ -35,6 +35,8 @@ CAD Model of ModBox Casing
 
 #### **400x400 Image:**
 
+![modbox2](./images/400x400modbox.jpeg)
+
 ---
 
 # Software Requirements Specification (SRS)
