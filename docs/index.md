@@ -131,11 +131,9 @@ During this project, the newest thing I challenged myself to learn was how to de
 
    Our motivation for this project is a general interest in synthesizers and modular synthesis, and curiosity to see how they translate to the embedded world. It’s pretty normal to create basic modular synthesizers with MCUs, but we want to take it to the next level and add more features to make it a nice combination of the analog and digital worlds.
 3. System Block Diagram
-
-   image
+   ![BlockDiagram](./images/BlockDiagram.png)
 4. Design Sketches
-
-   image
+   ![DesignSketch](./images/DesignSketch.png)
 5. Software Requirements Specification (SRS)
 
 Audio sampling and processing:
@@ -236,8 +234,7 @@ Functionality:
 1. Hardware Implementation & System Diagram
    Our hardware implementation centers around a modular rack where audio signals are processed through several custom modules: VCO, VCF, VCA, Echo, Discretizer, and an Envelope Generator.
    We’ve made one significant update to our original design: we are now using STM32s as our MCU Core instead of the ATmega328P to better handle the processing requirements. Currently, our Power and Physical UI systems are fully operational. While the Audio Input is still in development, we’ve established that the microphone signal will require dedicated hardware amplification and filtering to ensure high signal quality for the synthesizer.
-
-   IMAGE
+   ![blockdiagram](./images/BlockDiagram.png)
 2. Firmware Implementation & Drivers
    For the firmware, we are developing application logic on the STM32 to handle the high-speed conversion and routing of signals. We’ve written critical drivers for the ADC to read our physical UI knobs and the GPIO for our five module toggle buttons. The core logic currently manages the switching between hardware modules and the basic operation of the VCO and VCA, which are already functional. Implementation of Envelope Follower, Echo and Discretizer is done completely digitally.
 3. Device Demonstration
@@ -248,8 +245,7 @@ Functionality:
    On the hardware side, we’ve met most of our requirements for the Output Amplifier and Power Regulation. We verified the output buffer’s ability to stabilize the signal for the speaker. We are using a boost converter in our final output stage, the VCA.
 6. Remaining Elements (Mechanical & UI)
    Our final vision includes a custom mechanical casework that mimics a classic modular synth aesthetic. We will feature 'patch cable' wiring for visual effect and a structured interface for the module toggle buttons and adjuster knobs. Something similar to what we have below, though the UI will probably look a bit different.
-
-   IMAGE
+   ![DesignSketch](./images/DesignSketch.png)
 7. Risks & De-risking Plan
    Each time we add something we deal with amplification and noise issues. Adding one more element can break the rest of the circuits and code.
    One of the riskiest parts remaining is the Microphone Input. Because the raw electret signal is so weak and noisy, it could easily ruin the modular processing. To de-risk this, we are prioritizing the hardware filter/amplifier circuit this week to ensure we have a clean signal before Demo Day next week.
