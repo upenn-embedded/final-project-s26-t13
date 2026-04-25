@@ -52,29 +52,6 @@ volatile bool     ic_valid        = false;
 volatile bool     ic_updated      = false;
 volatile bool     ic_first        = true;
 
-/* --------------------------------------------------------------------------
- * EMA (Exponential Moving Average) filter for ic_period.
- *
- * Smooths out noisy potentiometer / input-capture readings so pitch
- * changes are gradual instead of jumping on every glitchy capture.
- *
- * Alpha controls the smoothing speed:
- *   lower  = smoother but slower to track real pot movement  (e.g. 0.05)
- *   higher = faster tracking but lets more noise through     (e.g. 0.3)
- *
- * Start at 0.1 — a good middle ground for a hand-turned pot.
- * Tune by ear: if pitch still jumps, lower it; if it lags too much, raise it.
- * -------------------------------------------------------------------------- */
-#define IC_EMA_ALPHA  0.1f
-static float ic_period_ema = 0.0f;   /* filtered period, in timer ticks */
-
-/* gate_state is set directly by the IC callback:
- *   rising edge  → true  (envelope trigger)
- *   falling edge → false (envelope release)
- * No ADC Schmitt trigger needed — the oscillator edge IS the gate. */
-static volatile bool gate_state = false;
-
-/* Last ADC reading — updated every ic_updated tick, read by debug print */
 static uint32_t  last_adc_raw   = 0;
 uint32_t last_gui_update = 0;
 
@@ -98,9 +75,7 @@ int main(void)
     MX_USART1_UART_Init();          /* Interface UART (7-byte packets)         */
     MX_ADC1_Init();
     MX_TIM2_Init();                 /* PWM pitch output on PA5                 */
-    MX_TIM3_Init();
-//
-    MX_SPI2_Init();/* Input capture on PA6 (pitch tracking)   */
+    MX_TIM3_Init();          /* Input capture on PA6 (pitch tracking)   */
 
     /* Start peripherals */
     HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
@@ -140,32 +115,22 @@ int main(void)
         {
             ic_updated = false;
 
-            /* ----------------------------------------------------------
-             * Apply EMA filter to ic_period before computing pitch.
-             *
-             * On the very first valid capture, seed the filter with the
-             * raw value so there's no ramp-up from zero on startup.
-             * -------------------------------------------------------- */
-            if (ic_period_ema == 0.0f)
-                ic_period_ema = (float)ic_period;   /* seed on first capture */
-            else
-                ic_period_ema += IC_EMA_ALPHA * ((float)ic_period - ic_period_ema);
-
-            /* Compute the new PWM period from the filtered IC frequency */
-            uint32_t dynamic_period = (uint32_t)(8.4f * ic_period_ema) - 1;
+            /* Compute the new PWM period from the raw IC frequency */
+            uint32_t dynamic_period = (uint32_t)(8.4f * (float)ic_period) - 1;
 
             /* Clamp to 200 Hz – 5 kHz */
             if (dynamic_period > 41999) dynamic_period = 41999;
             if (dynamic_period < 1679)  dynamic_period = 1679;
 
             /* Read ADC for audio input sample */
+            HAL_ADC_Start(&hadc1);
             HAL_ADC_PollForConversion(&hadc1, 1);
             uint32_t adc_raw      = HAL_ADC_GetValue(&hadc1);
             last_adc_raw          = adc_raw;
-            float    input_sample = (float)((int32_t)adc_raw - 2048) * 32.0f;
+            float    input_sample = (float)((int32_t)adc_raw - 2048) * 16.0f;
 
-            /* Gate comes directly from oscillator edges (set in IC callback) */
-            bool hardware_gate = gate_state;
+            /* Gate derived from ADC threshold */
+            bool hardware_gate = (adc_raw > 2048);
 
             /* -----------------------------------------------------------
              * Run the sample through the active preset module chain.
@@ -261,38 +226,21 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
 {
     if (htim->Instance == TIM3 && htim->Channel == HAL_TIM_ACTIVE_CHANNEL_1)
     {
-        uint32_t current  = HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_1);
-        bool     pin_high = (HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_6) == GPIO_PIN_SET);
+        uint32_t current = HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_1);
 
-        if (pin_high)
+        if (!ic_first)
         {
-            /* Rising edge — open gate and measure full period (rise-to-rise). */
-            gate_state = true;
+            if (current >= ic_last_capture)
+                ic_period = current - ic_last_capture;
+            else
+                ic_period = (0xFFFF - ic_last_capture) + current + 1;
 
-            if (!ic_first)
-            {
-                if (current >= ic_last_capture)
-                    ic_period = current - ic_last_capture;
-                else
-                    ic_period = (0xFFFF - ic_last_capture) + current + 1;
-
-                ic_valid   = true;
-                ic_updated = true;
-            }
-
-            ic_first        = false;
-            ic_last_capture = current;
+            ic_valid   = true;
+            ic_updated = true;
         }
-        else
-        {
-            /* Falling edge — close gate so the envelope begins release.
-             * Period is not updated (still rising-to-rising).
-             * Set ic_updated so the main loop runs Pipeline_Process and
-             * the envelope release is applied without waiting a full period. */
-            gate_state = false;
-            if (ic_valid)
-                ic_updated = true;
-        }
+
+        ic_first        = false;
+        ic_last_capture = current;
     }
 }
 

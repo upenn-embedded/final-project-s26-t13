@@ -92,19 +92,14 @@ void HAL_UART_MspInit(UART_HandleTypeDef* uartHandle)
   GPIO_InitTypeDef GPIO_InitStruct = {0};
   if(uartHandle->Instance==USART1)
   {
-  /* USER CODE BEGIN USART1_MspInit 0 */
-	  HAL_NVIC_EnableIRQ(USART1_IRQn);
-	  HAL_NVIC_SetPriority(USART1_IRQn, 1, 0);
-
-  /* USER CODE END USART1_MspInit 0 */
-    /* USART1 clock enable */
+    /* Clock must be enabled before touching any USART1 registers or enabling IRQ */
     __HAL_RCC_USART1_CLK_ENABLE();
-
     __HAL_RCC_GPIOA_CLK_ENABLE();
     __HAL_RCC_GPIOB_CLK_ENABLE();
+
     /**USART1 GPIO Configuration
     PA15     ------> USART1_TX
-    PB7     ------> USART1_RX
+    PB7      ------> USART1_RX
     */
     GPIO_InitStruct.Pin = GPIO_PIN_15;
     GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
@@ -120,23 +115,14 @@ void HAL_UART_MspInit(UART_HandleTypeDef* uartHandle)
     GPIO_InitStruct.Alternate = GPIO_AF7_USART1;
     HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
-  /* USER CODE BEGIN USART1_MspInit 1 */
-
-  /* USER CODE END USART1_MspInit 1 */
+    /* IRQ enabled last — peripheral must be clocked and GPIOs configured first */
+    HAL_NVIC_SetPriority(USART1_IRQn, 1, 0);
+    HAL_NVIC_EnableIRQ(USART1_IRQn);
   }
   else if(uartHandle->Instance==USART2)
   {
-  /* USER CODE BEGIN USART2_MspInit 0 */
-
-  /* USER CODE END USART2_MspInit 0 */
-    /* USART2 clock enable */
-	  HAL_NVIC_EnableIRQ(USART2_IRQn);
-
     __HAL_RCC_USART2_CLK_ENABLE();
-
     __HAL_RCC_GPIOA_CLK_ENABLE();
-
-    HAL_NVIC_SetPriority(USART2_IRQn, 2, 0);
 
     /**USART2 GPIO Configuration
     PA2     ------> USART2_TX
@@ -149,9 +135,8 @@ void HAL_UART_MspInit(UART_HandleTypeDef* uartHandle)
     GPIO_InitStruct.Alternate = GPIO_AF7_USART2;
     HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-  /* USER CODE BEGIN USART2_MspInit 1 */
-
-  /* USER CODE END USART2_MspInit 1 */
+    HAL_NVIC_SetPriority(USART2_IRQn, 2, 0);
+    HAL_NVIC_EnableIRQ(USART2_IRQn);
   }
 }
 

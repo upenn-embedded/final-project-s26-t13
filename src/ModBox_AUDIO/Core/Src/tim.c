@@ -82,7 +82,7 @@ void HAL_TIM_PWM_MspInit(TIM_HandleTypeDef* tim_pwmHandle)
     /* TIM2 clock enable */
     __HAL_RCC_TIM2_CLK_ENABLE();
 
-    HAL_NVIC_SetPriority(TIM2_IRQn, 0, 0);
+    HAL_NVIC_SetPriority(TIM2_IRQn, 1, 0);
     HAL_NVIC_EnableIRQ(TIM2_IRQn);
 
   /* USER CODE BEGIN TIM2_MspInit 1 */
@@ -109,10 +109,7 @@ void MX_TIM3_Init(void)
         Error_Handler();
     }
 
-    /* Capture on both edges:
-     *   Rising  → measure full period (rise-to-rise) + open gate
-     *   Falling → close gate so envelope begins release */
-    sICConfig.ICPolarity  = TIM_ICPOLARITY_BOTHEDGE;
+    sICConfig.ICPolarity  = TIM_ICPOLARITY_RISING;
     sICConfig.ICSelection = TIM_ICSELECTION_DIRECTTI;
     sICConfig.ICPrescaler = TIM_ICPSC_DIV1;
     sICConfig.ICFilter    = 0x0F;  // some filtering for noisy signals
@@ -136,7 +133,7 @@ void HAL_TIM_IC_MspInit(TIM_HandleTypeDef* tim_icHandle)
         GPIO_InitStruct.Alternate = GPIO_AF2_TIM3;
         HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-        HAL_NVIC_SetPriority(TIM3_IRQn, 1, 0);
+        HAL_NVIC_SetPriority(TIM3_IRQn, 0, 0);
         HAL_NVIC_EnableIRQ(TIM3_IRQn);
     }
 }

@@ -70,7 +70,9 @@ void HAL_MspInit(void)
   __HAL_RCC_PWR_CLK_ENABLE();
   __HAL_RCC_TIM2_CLK_ENABLE();
 
-  HAL_NVIC_SetPriorityGrouping(NVIC_PRIORITYGROUP_0);
+  /* 4 preemption bits, 0 subpriority — enables true ISR preemption.
+   * TIM3 IC at 0 (highest) can preempt UART/DMA at 3 (lowest). */
+  HAL_NVIC_SetPriorityGrouping(NVIC_PRIORITYGROUP_4);
 
   /* System interrupt init*/
 
