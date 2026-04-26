@@ -10,7 +10,6 @@
   </iframe>
 </div>
 
-
 **Demo:** We give an overview of the design process and a demostration of ModBox's user interface.
 
 ---
@@ -112,9 +111,13 @@ With the analog side of our project, we faced major challenges with noise and im
 
 ---
 
-# Reflection
+# Reflections
 
 **Bhavya:**
+
+For me, working on ModBox was simultaneously one of the most difficult and one of the coolest experiences during my time at Penn. I've worked on complex, multi-part projects before in other classes and at internships, but it was a whole new beast to tackle designing an embedded project, proposing it and adapting it based on feedback, and then starting completely from scratch and getting it done in an incredibly short time-frame. Embedded is uniquely difficult because you have bugs both in hardware and software, which was multiplied by the fact that this was not a project that we knew would work, like the labs. Despite all the challenges, I am truly floored by how much I have learned in the past couple weeks. Struggling through setting up STM32s, learning the registers, driver syntax, and repository structure, and learning to use the Cube IDE was time-consuming but worth it, since I hope to do further projects with STM32s and now understand how they work intimately. I focused a lot on the code for the digital components and communication between parts, as well as the integration of all the analog modules with everything going on digitally with our two STM32s, and I remember feeling so overwhelmed when starting to code since there were so many moving parts. I initially wrote all the code in one project folder, then realized I needed to move everything for the audio STM to another project, which required figuring out just how STM projects compile with .proj files and making sure everything stayed together. We used STM CubeMX to generate our drivers and initially set our pins, since it was easy to tell what pins had what functionality, but then we also realized the caveats of CubeMX and how you had to leave your code in a certain structure so MX could regenerate files based on what pins you set. We pivoted away from this, setting everything in code, but it was definitely a learning experience when some of our code in main.c deleted when we ran CubeMX and changed pins. In general, we had a lot of times when things went wrong and we had to change the way we were doing things, but we really did learn by doing and pick up so much along the way. I got very comfortable with understanding STM pins and figuring out what needed to go where, and developed a coding style that worked well for me and for our project. I also got to assemble a lot of the final form factor, reorganizing our many breadboards and STMs, and it was cool to see everything come together.
+
+A general theme of our project was realizing just how much goes into integration and how even if you have all your analog and digital parts working and unproblematic in theory, when you try to bring every thing together, you will undoubtedly have issues. I realized that this was the most stressful part, but also taught me a lot about how MCUs work on a deeper basis and how when you are running so many different processes on them, you really need to understand what those processes are doing so you can prioritize certain things and make sure you have enough compute power and clock speed to do those things. I feel like I really started to enjoy embedded systems in a way I hadn't before because we had so much control over what we were doing and, thankfully, were able to reap the fruits of our labor when a project we completely conceptualized and executed actually worked. It was really exciting, and I made a lot of memories and friendships from working on this project that I will cherish!
 
 **Sarah:**
 
