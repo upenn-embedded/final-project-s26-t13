@@ -189,25 +189,4 @@ UART(DONE)
 Don't forget to make the GitHub pages public website!
 If you’ve never made a GitHub pages website before, you can follow this webpage (though, substitute your final project repository for the GitHub username one in the quickstart guide):  [https://docs.github.com/en/pages/quickstart](https://docs.github.com/en/pages/quickstart)
 
-### 1. Video
-
-### 2. Images
-
-### 3. Results
-
-#### 3.1 Software Requirements Specification (SRS) Results
-
-| ID     | Description                                                                                               | Validation Outcome                                                                          |
-| ------ | --------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
-| SRS-01 | The IMU 3-axis acceleration will be measured with 16-bit depth every 100 milliseconds +/-10 milliseconds. | Confirmed, logged output from the MCU is saved to "validation" folder in GitHub repository. |
-
-#### 3.2 Hardware Requirements Specification (HRS) Results
-
-| ID     | Description                                                                                                                        | Validation Outcome                                                                                                      |
-| ------ | ---------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| HRS-01 | A distance sensor shall be used for obstacle detection. The sensor shall detect obstacles at a maximum distance of at least 10 cm. | Confirmed, sensed obstacles up to 15cm. Video in "validation" folder, shows tape measure and logged output to terminal. |
-|        |                                                                                                                                    |                                                                                                                         |
-
-### 4. Conclusion
-
-## References
+**Our final report website is at this link:** [https://upenn-embedded.github.io/final-project-s26-t13/]()
